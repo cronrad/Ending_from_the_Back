@@ -64,6 +64,25 @@ def login():
         )
         response.set_cookie("auth_token", token, max_age=3600) #TODO: HttpOnly header as well?
         return response
+    
+@app.route('/new_post', methods=['POST'])
+def new_post():
+    body = request.get_json()
+    #Checks for authentication
+    if body.get("auth_token") == None:
+        response = app.response_class(
+            response = "Access Denied, Login to make a post",
+            status = 403,
+            mimetype = 'text/plain'
+        )
+        return response
+    else:
+        #Adds the post to database
+        title = body.get("title")
+        description = body.get("description")
+        content = body.get("content")
+        postDB.insert_one({"title": title, "description": description, "content": content})
+        return response                #Frontend should ignore the response
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080)
