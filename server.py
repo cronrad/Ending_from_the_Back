@@ -61,7 +61,7 @@ def login():
             status = 200,
             mimetype='text/plain'
         )
-        response.set_cookie("auth_token", token, max_age=3600) #TODO: HttpOnly header as well?
+        response.set_cookie("auth_token", token, max_age=3600, httponly=True)
         return response
     
 @app.route('/new_post', methods=['POST'])
