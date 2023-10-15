@@ -1,5 +1,6 @@
 from flask import *
 from utils.database import *
+import json
 
 app = Flask(__name__, static_folder='public')
 
@@ -24,9 +25,8 @@ def root():
 
 @app.route('/register', methods=['POST'])
 def register():
-    body = request.get_json()
-    username = body.get("username")
-    password = body.get("password")
+    username = request.form.get("username_reg")
+    password = request.form.get("password_reg")
     result = registerDB(username, password)
     if result == False:
         response = app.response_class(
@@ -45,9 +45,8 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    body = request.get_json()
-    username = body.get("username")
-    password = body.get("password")
+    username = request.form.get("username_login")
+    password = request.form.get("password_login")
     token, username = authenticate(username, password, None, True)
     if token == False:
         response = app.response_class(
@@ -58,7 +57,7 @@ def login():
         return response
     elif token != False: #Set cookie
         response = app.response_class(
-            response = "Login Successful! Welcome ",
+            response = "Login Successful! Welcome " + username,
             status = 200,
             mimetype='text/plain'
         )
@@ -66,4 +65,4 @@ def login():
         return response
 
 if __name__ == '__main__':
-   app.run(host='0.0.0.0', port=8080)
+   app.run(host='0.0.0.0', port=8080, debug=True)
