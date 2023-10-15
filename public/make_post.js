@@ -1,10 +1,11 @@
-function chatMessageHTML(postJSON) {
+function postHTML(postJSON) {
     const username = postJSON.username;
-    const message = postJSON.message;
-    const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(\"" + messageId + "\")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
-    return messageHTML;
+    const title = postJSON.title;
+    const description = postJSON.description;
+    const content = postJSON.content;
+    const postId = postJSON.id;
+    postHTML += "<span id='post_" + postId + "'><b>" + username + "</b>: " + title + " - "+ description + "<br><br>" + content + "</span>";
+    return postHTML;
 }
 
 function clearPost() {
@@ -16,40 +17,46 @@ function clearPost() {
     postContent.innerHTML = "";
 }
 
-function addMessageToChat(messageJSON) {
-    const chatMessages = document.getElementById("chat-messages");
-    chatMessages.innerHTML += chatMessageHTML(messageJSON);
-    chatMessages.scrollIntoView(false);
-    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+function addPosts(postJSON) {
+    const posts = document.getElementById("posts");
+    posts.innerHTML += postHTML(postJSON);
+    posts.scrollIntoView(false);
+    posts.scrollTop = posts.scrollHeight - posts.clientHeight;
 }
 
-function sendChat() {
-    const chatTextBox = document.getElementById("chat-text-box");
-    const message = chatTextBox.value;
-    chatTextBox.value = "";
+function sendPost() {
+    const postTitleBox = document.getElementById("post-title-box");
+    const postDescriptionBox = document.getElementById("post-description-box");
+    const postContentBox = document.getElementById("post-content-box");
+    const title = postTitleBox.value;
+    const description = postDescriptionBox.value;
+    const content = postContentBox.value;
+    postTitleBox.value = "";
+    postDescriptionBox.value = "";
+    postContentBox.value = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const messageJSON = {"message": message};
-    request.open("POST", "/chat-message");
+    const postJSON = {"title": title, "description": description, "content": content};
+    request.open("POST", "/new_post");
     request.send(JSON.stringify(messageJSON));
     chatTextBox.focus();
 }
 
-function updateChat() {
+function updatePost() {
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            clearChat();
-            const messages = JSON.parse(this.response);
-            for (const message of messages) {
-                addMessageToChat(message);
+            clearPost();
+            const posts = JSON.parse(this.response);
+            for (const post of posts) {
+                addPosts(post);
             }
         }
     }
-    request.open("GET", "/chat-history");
+    request.open("GET", "/posts");
     request.send();
 }
