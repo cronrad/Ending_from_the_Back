@@ -39,8 +39,8 @@ def registerDB(username, password):
 #Login authentication function. Takes a username, password, authentication token from a cookie, and the option to ignore the token
 #Author: Gordon Tang
 #Inputs: username, password, and token can be None or "". ignore_token is either True or False
-#Outputs: Returns a token and username. Token can be used for cookie. If it's an invalid login, then it returns (False, False)
-#Example call: auth_token, verified_name = login(username, password, token, False)
+#Outputs: Returns a tupple that contains a token and username. Token can be used for cookie. If it's an invalid login, then it returns (False, False)
+#Example call: auth_token, verified_name = authenticate(username, password, token, False)
 def authenticate(username, password, token, ignore_token):
     if username == "":
         username = None
