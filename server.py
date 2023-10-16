@@ -23,6 +23,7 @@ def root():
     else: #Not logged in, send login page
         return render_template('login.html')
 
+#For registration
 @app.route('/register', methods=['POST'])
 def register():
     username = request.form.get("username_reg")
@@ -43,6 +44,8 @@ def register():
         )
         return response
 
+#If you're looking to check if a user is authenticated, check authenticate() in utils/database.py
+#This is for processing the login from the login.html page only
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form.get("username_login")
@@ -75,7 +78,7 @@ def new_post():
             mimetype = 'text/plain'
         )
         return response
-    else:
+    else: #TODO: Check if the auth token matches, otherwise this will run with any token valid or invalid, use authenticate()
         #Adds the post to database
         title = body.get("title")
         description = body.get("description")
