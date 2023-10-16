@@ -81,7 +81,7 @@ def new_post():
         description = body.get("description")
         content = body.get("content")
         postDB.insert_one({"title": title, "description": description, "content": content})
-        return response                #Frontend should ignore the response
+        return response  #Frontend should ignore the response
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)
