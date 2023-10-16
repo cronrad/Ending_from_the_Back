@@ -63,7 +63,7 @@ def login():
         )
         response.set_cookie("auth_token", token, max_age=3600, httponly=True)
         return response
-    
+
 @app.route('/new_post', methods=['POST'])
 def new_post():
     body = request.get_json()
@@ -81,7 +81,12 @@ def new_post():
         description = body.get("description")
         content = body.get("content")
         postDB.insert_one({"title": title, "description": description, "content": content})
-        return response  #Frontend should ignore the response
+        response = app.response_class(
+            response="Post submitted",
+            status=200,
+            mimetype='text/plain'
+        )
+        return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)
