@@ -71,25 +71,36 @@ def login():
 def new_post():
     body = request.get_json()
     #Checks for authentication
-    if body.get("auth_token") == None:
+    if request.cookies.get("auth_token") == None:
         response = app.response_class(
             response = "Access Denied, Login to make a post",
             status = 403,
             mimetype = 'text/plain'
         )
         return response
-    else: #TODO: Check if the auth token matches, otherwise this will run with any token valid or invalid, use authenticate()
-        #Adds the post to database
-        title = body.get("title")
-        description = body.get("description")
-        content = body.get("content")
-        postDB.insert_one({"title": title, "description": description, "content": content})
-        response = app.response_class(
-            response="Post submitted",
-            status=200,
-            mimetype='text/plain'
-        )
-        return response #The http response shouldn't change the page but you can still see this response in the network tab
+    else: 
+        #Checks if the auth token matches
+        auth_token = request.cookies.get("auth_token")
+        token_check, username = authenticate("", "", auth_token, False)
+        if username == False and token_check == False:
+            response = app.response_class(
+                response = "Access Denied, Login to make a post",
+                status = 403,
+                mimetype = 'text/plain'
+                )
+            return response
+        else:
+            #Adds the post to database
+            title = body.get("title")
+            description = body.get("description")
+            content = body.get("content")
+            postDB.insert_one({"title": title, "description": description, "content": content})
+            response = app.response_class(
+                response="Post submitted",
+                status=200,
+                mimetype='text/plain'
+            )
+            return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)
