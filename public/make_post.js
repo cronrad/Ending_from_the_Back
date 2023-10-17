@@ -60,3 +60,17 @@ function updatePost() {
     request.open("GET", "/posts");
     request.send();
 }
+
+function newPost() {
+    document.addEventListener("keypress", function (event) {
+        if (event.code === "Enter") {
+            sendPost();
+        }
+    });
+
+    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center>/h1>";
+    document.getElementById("post-title-box").focus();
+
+    updatePost();
+    setInterval(updatePost, 1000);
+}

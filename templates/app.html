@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="public/style.css"/>
+    <meta charset="UTF-8">
+</head>
+
+<body onload="newPost();">
+    <script src="public/make_post.js"></script>
+    <p id="paragraph">
+        <div class="title">
+            <h3><center>Just fill out the details and press post</center></h3>
+        </div>
+    </p>
+
+    <div class="content">
+        <div class="post-content">
+            <div id="posts">
+            </div>
+    
+            <div class="post-input">
+                <hr>
+                <label>
+                    Title:
+                    <input id="post-title-box" type="text">
+                    Description:
+                    <input id="post-description-box" type="text">
+                    Content:
+                    <input id="post-content-box" type="text">
+                </label>
+                <button id="posts-button" onclick="sendPost()">Post</button>
+            </div>
+    
+        </div>
+        <div class="users">
+    
+    
+        </div>
+    </div>
+</body>
+</html>
