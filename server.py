@@ -1,6 +1,7 @@
 from flask import *
 from utils.database import *
 import json
+import bson.json_util as json_util
 
 app = Flask(__name__, static_folder='public')
 
@@ -69,7 +70,7 @@ def login():
 
 @app.route('/new_post', methods=['POST'])
 def new_post():
-    body = request.get_json()
+    body = json.loads(request.get_data())
     #Checks for authentication
     if request.cookies.get("auth_token") == None:
         response = app.response_class(
@@ -101,6 +102,19 @@ def new_post():
                 mimetype='text/plain'
             )
             return response #The http response shouldn't change the page but you can still see this response in the network tab
+
+@app.route('/posts', methods=['GET'])
+def posts():
+    post_list = []
+    for chat in postDB.find({}):
+        chat["_id"] = json_util.dumps(chat["_id"])
+        post_list.append(chat)
+    response = app.response_class(
+        response=str(json.dumps(post_list)),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)

@@ -41,9 +41,10 @@ function sendPost() {
         }
     }
     const postJSON = {"title": title, "description": description, "content": content};
+    console.log(postJSON)
     request.open("POST", "/new_post");
-    request.send(JSON.stringify(messageJSON));
-    chatTextBox.focus();
+    request.send(JSON.stringify(postJSON));
+    postTitleBox.focus();
 }
 
 function updatePost() {
@@ -68,7 +69,7 @@ function newPost() {
         }
     });
 
-    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center>/h1>";
+    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
     updatePost();

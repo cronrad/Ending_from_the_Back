@@ -22,25 +22,18 @@ body {
     height: 78%
 }
 
-.post-content {
-    width: 70%;
+.app {
+    width: 100%;
     background-color: #146C94;
     padding: 20px;
 }
 
 #posts {
     height: 90%;
-    overflow: scroll;
 }
 
-.post-input{
+.post-form {
     height: 30px;
-}
-
-.users {
-    width: 30%;
-    background-color: #19A7CE;
-    padding: 20px;
 }
 
 .header > div {
