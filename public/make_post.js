@@ -1,18 +1,15 @@
 function postHTML(postJSON) {
-    const title = postJSON.title;
-    const description = postJSON.description;
-    const content = postJSON.content;
-    let postHTML = "<span><b>" + title + "</b>: - "+ description + "<br><br>" + content + "</span>";
+    const title = postJSON["title"];
+    const description = postJSON["description"];
+    const content = postJSON["content"];
+    let postHTML = "";
+    postHTML += "<span><b>" + title + "</b>: - "+ description + "<br><br>" + content + "<br><br><br><br></span>";
     return postHTML;
 }
 
 function clearPost() {
-    const postTitle = document.getElementById("title");
-    const postDescription = document.getElementById("description");
-    const postContent = document.getElementById("content");
-    postTitle.innerHTML = "";
-    postDescription.innerHTML = "";
-    postContent.innerHTML = "";
+    const posts = document.getElementById("posts");
+    posts.innerHTML = "";
 }
 
 function addPosts(postJSON) {
@@ -38,7 +35,6 @@ function sendPost() {
         }
     }
     const postJSON = {"title": title, "description": description, "content": content};
-    console.log(postJSON)
     request.open("POST", "/new_post");
     request.send(JSON.stringify(postJSON));
     postTitleBox.focus();
@@ -51,6 +47,7 @@ function updatePost() {
             clearPost();
             const posts = JSON.parse(this.response);
             for (const post of posts) {
+                console.log(post)
                 addPosts(post);
             }
         }

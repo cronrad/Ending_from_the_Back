@@ -106,9 +106,9 @@ def new_post():
 @app.route('/posts', methods=['GET'])
 def posts():
     post_list = []
-    for chat in postDB.find({}):
-        chat["_id"] = json_util.dumps(chat["_id"])
-        post_list.append(chat)
+    for post in postDB.find({}):
+        post["_id"] = json_util.dumps(post["_id"])
+        post_list.append(post)
     response = app.response_class(
         response=str(json.dumps(post_list)),
         status=200,
