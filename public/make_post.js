@@ -1,10 +1,8 @@
 function postHTML(postJSON) {
-    const username = postJSON.username;
     const title = postJSON.title;
     const description = postJSON.description;
     const content = postJSON.content;
-    const postId = postJSON.id;
-    postHTML += "<span id='post_" + postId + "'><b>" + username + "</b>: " + title + " - "+ description + "<br><br>" + content + "</span>";
+    let postHTML = "<span><b>" + title + "</b>: - "+ description + "<br><br>" + content + "</span>";
     return postHTML;
 }
 
@@ -20,8 +18,7 @@ function clearPost() {
 function addPosts(postJSON) {
     const posts = document.getElementById("posts");
     posts.innerHTML += postHTML(postJSON);
-    posts.scrollIntoView(false);
-    posts.scrollTop = posts.scrollHeight - posts.clientHeight;
+
 }
 
 function sendPost() {

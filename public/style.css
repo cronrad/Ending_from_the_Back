@@ -1,4 +1,3 @@
-
 body {
     background-color: #000000;
     color: white;
@@ -8,34 +7,10 @@ body {
     height: 5%;
 }
 
-.header {
-    display: flex;
-    background-color: #F6F1F1;
-    color: black;
-    height: 17%;
-    align-items: center;
-}
-
-.content {
-    display: flex;
-    justify-content: space-around;
-    height: 78%
-}
-
-.app {
-    width: 100%;
-    background-color: #146C94;
-    padding: 20px;
-}
-
 #posts {
-    height: 90%;
+    height: 100%;
 }
 
 .post-form {
-    height: 30px;
-}
-
-.header > div {
-    padding: 20px;
+    height: 100%;
 }
