@@ -94,8 +94,7 @@ def new_post():
             #Adds the post to database
             title = body.get("title")
             description = body.get("description")
-            content = body.get("content")
-            postDB.insert_one({"title": title, "description": description, "content": content})
+            postDB.insert_one({"title": title, "description": description, "username": username})
             response = app.response_class(
                 response="Post submitted",
                 status=200,
@@ -105,6 +104,7 @@ def new_post():
 
 @app.route('/posts', methods=['GET'])
 def posts():
+    #This keeps track of all the posts and updates
     post_list = []
     for post in postDB.find({}):
         post["_id"] = json_util.dumps(post["_id"])
@@ -115,6 +115,19 @@ def posts():
         mimetype='application/json'
     )
     return response
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    #This logs user out incase they want to logout or switch to a different account
+    auth_token = request.cookies.get("auth_token")
+    token_check, username = authenticate("", "", auth_token, False)
+    authDB.update_one({},{"$unset": {"authToken": ""}})
+    response = app.response_class(
+        response=username,
+        status=200,
+        mimetype='text/plain'
+    )
+    return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)

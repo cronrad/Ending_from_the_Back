@@ -1,9 +1,21 @@
+function logOut() {
+    let username = ""
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            username = this.response;
+        }
+    }
+    request.open("POST", "/logout");
+    request.send(JSON.stringify(username));
+}
+
 function postHTML(postJSON) {
+    const username = postJSON.username;
     const title = postJSON["title"];
     const description = postJSON["description"];
-    const content = postJSON["content"];
     let postHTML = "";
-    postHTML += "<span><b>" + title + "</b>: - "+ description + "<br><br>" + content + "<br><br><br><br></span>";
+    postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br><br></span>";
     return postHTML;
 }
 
@@ -21,20 +33,17 @@ function addPosts(postJSON) {
 function sendPost() {
     const postTitleBox = document.getElementById("post-title-box");
     const postDescriptionBox = document.getElementById("post-description-box");
-    const postContentBox = document.getElementById("post-content-box");
     const title = postTitleBox.value;
     const description = postDescriptionBox.value;
-    const content = postContentBox.value;
     postTitleBox.value = "";
     postDescriptionBox.value = "";
-    postContentBox.value = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const postJSON = {"title": title, "description": description, "content": content};
+    const postJSON = {"title": title, "description": description};
     request.open("POST", "/new_post");
     request.send(JSON.stringify(postJSON));
     postTitleBox.focus();
@@ -47,7 +56,6 @@ function updatePost() {
             clearPost();
             const posts = JSON.parse(this.response);
             for (const post of posts) {
-                console.log(post)
                 addPosts(post);
             }
         }
