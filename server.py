@@ -98,8 +98,8 @@ def new_post():
             cur = postDB.find()
             id = 0
             for i in cur:
-                if(cur["id"] >= id):
-                    id = cur["id"] + 1
+                if(i["id"] >= id):
+                    id = i["id"] + 1
             postDB.insert_one({"id": id, "title": title, "description": description, "username": username, "likes": []})
             response = app.response_class(
                 response="Post submitted",
@@ -134,7 +134,7 @@ def logout():
         mimetype='text/plain'
     )
     return response #The http response shouldn't change the page but you can still see this response in the network tab
-@app.route('like_post', methods=['POST'])
+@app.route('/like_post', methods=['POST'])
 def like_post():
     body = json.loads(request.get_data())
     #Checks for authentication
