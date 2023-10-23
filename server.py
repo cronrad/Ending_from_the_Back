@@ -92,8 +92,8 @@ def new_post():
             return response
         else:
             #Adds the post to database
-            title = body.get("title")
-            description = body.get("description")
+            title = HTMLescaper(body.get("title"))
+            description = HTMLescaper(body.get("description"))
             #Find the next ID available
             cur = postDB.find()
             id = 0
