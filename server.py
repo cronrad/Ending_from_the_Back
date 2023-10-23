@@ -164,12 +164,25 @@ def like_post():
             cur = postDB.find_one({"id": id})
             if username not in cur["likes"]:
                 cur["likes"].append(username)
-                response = app.response_class(
-                    response="Post submitted",
-                    status=200,
-                    mimetype='text/plain'
-                )
-                return response
+                myquery = {"id": id}
+                newvalues = {"$set": {"likes": cur["likes"]}}
+                postDB.update_one(myquery, newvalues)
+                cur["likes"].append(username)
+            else:
+                cur["likes"].remove(username)
+                myquery = {"id": id}
+                newvalues = {"$set": {"likes": cur["likes"]}}
+                postDB.update_one(myquery, newvalues)
+                cur["likes"].append(username)
+
+            response = app.response_class(
+                response="Post submitted",
+                status=200,
+                mimetype='text/plain'
+            )
+
+            return response
+
             # return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
