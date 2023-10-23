@@ -158,7 +158,10 @@ def like_post():
             return response
         else:
             #Adds like to the post in database
-            cur = postDB.find_one({"id": id}) #TODO NEED ID
+            id = body.get("id")
+            username = body.get("username")
+
+            cur = postDB.find_one({"id": id})
             if username not in cur["likes"]:
                 cur["likes"].append(username)
                 response = app.response_class(
@@ -166,7 +169,8 @@ def like_post():
                     status=200,
                     mimetype='text/plain'
                 )
-            return response #The http response shouldn't change the page but you can still see this response in the network tab
+                return response
+            # return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)

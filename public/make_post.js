@@ -10,7 +10,7 @@ function logOut() {
     request.send(JSON.stringify(username));
 }
 
-function likePost(id, username) {
+function likePost(username, id) {
     var request = new XMLHttpRequest();
 
     request.onreadystatechange = function() {
@@ -27,6 +27,7 @@ function likePost(id, username) {
 
     request.open('POST', '/like_post');
     request.send(JSON.stringify(data));
+    updatePost();
 }
 
 
