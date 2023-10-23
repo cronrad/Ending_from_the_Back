@@ -144,6 +144,7 @@ def logout():
         status=200,
         mimetype='text/plain'
     )
+    response.set_cookie("auth_token", "", max_age=3600, httponly=True)
     return response #The http response shouldn't change the page but you can still see this response in the network tab
 @app.route('/like_post', methods=['POST'])
 def like_post():
