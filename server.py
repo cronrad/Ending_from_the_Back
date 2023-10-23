@@ -94,7 +94,13 @@ def new_post():
             #Adds the post to database
             title = body.get("title")
             description = body.get("description")
-            postDB.insert_one({"title": title, "description": description, "username": username})
+            #Find the next ID available
+            cur = postDB.find()
+            id = 0
+            for i in cur:
+                if(i["id"] >= id):
+                    id = i["id"] + 1
+            postDB.insert_one({"id": id, "title": title, "description": description, "username": username, "likes": []})
             response = app.response_class(
                 response="Post submitted",
                 status=200,
@@ -128,6 +134,56 @@ def logout():
         mimetype='text/plain'
     )
     return response #The http response shouldn't change the page but you can still see this response in the network tab
+@app.route('/like_post', methods=['POST'])
+def like_post():
+    body = json.loads(request.get_data())
+    #Checks for authentication
+    if request.cookies.get("auth_token") == None:
+        response = app.response_class(
+            response = "Access Denied, Login to make a post",
+            status = 403,
+            mimetype = 'text/plain'
+        )
+        return response
+    else:
+        #Checks if the auth token matches
+        auth_token = request.cookies.get("auth_token")
+        token_check, username = authenticate("", "", auth_token, False)
+        if username == False and token_check == False:
+            response = app.response_class(
+                response = "Access Denied, Login to make a post",
+                status = 403,
+                mimetype = 'text/plain'
+                )
+            return response
+        else:
+            #Adds like to the post in database
+            id = body.get("id")
+            username = body.get("username")
+
+            cur = postDB.find_one({"id": id})
+            if username not in cur["likes"]:
+                cur["likes"].append(username)
+                myquery = {"id": id}
+                newvalues = {"$set": {"likes": cur["likes"]}}
+                postDB.update_one(myquery, newvalues)
+                cur["likes"].append(username)
+            else:
+                cur["likes"].remove(username)
+                myquery = {"id": id}
+                newvalues = {"$set": {"likes": cur["likes"]}}
+                postDB.update_one(myquery, newvalues)
+                cur["likes"].append(username)
+
+            response = app.response_class(
+                response="Post submitted",
+                status=200,
+                mimetype='text/plain'
+            )
+
+            return response
+
+            # return response #The http response shouldn't change the page but you can still see this response in the network tab
 
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)
