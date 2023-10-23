@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8ad766ca-9088-4236-b69a-40e397d87154" name="Changes" comment="Added HttpOnly directive for auth cookie" />
+    <list default="true" id="8ad766ca-9088-4236-b69a-40e397d87154" name="Changes" comment="Added HttpOnly directive for auth cookie">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -90,7 +94,7 @@
       <workItem from="1698029225255" duration="1442000" />
       <workItem from="1698032739644" duration="745000" />
       <workItem from="1698033542338" duration="9000" />
-      <workItem from="1698033607475" duration="3172000" />
+      <workItem from="1698033607475" duration="3785000" />
     </task>
     <servers />
   </component>

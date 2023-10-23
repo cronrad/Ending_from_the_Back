@@ -24,6 +24,12 @@ def root():
     else: #Not logged in, send login page
         return render_template('login.html')
 
+
+
+@app.route('/app')
+def guestView():
+    return render_template('app.html')
+
 #For registration
 @app.route('/register', methods=['POST'])
 def register():
