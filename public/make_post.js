@@ -9,9 +9,28 @@ function logOut() {
     request.open("POST", "/logout");
     request.send(JSON.stringify(username));
 }
-function LIKE_FUNCTION() {
-    return false;
+
+function likePost(id, username) {
+    var request = new XMLHttpRequest();
+
+    request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+            if (request.status == 200) {
+                console.log('POST request successful');
+            } else {
+                console.error('POST request failed');
+            }
+        }
+    };
+
+    var data = {"id": id, "username" : username}
+
+    request.open('POST', '/like_post');
+    request.send(JSON.stringify(data));
 }
+
+
+
 
 function postHTML(postJSON) {
     const username = postJSON.username;
@@ -20,15 +39,20 @@ function postHTML(postJSON) {
     // const likes = postJSON["likes"].size();
     const likes = postJSON["likes"].length;
     const liked = postJSON["likes"].includes(username);
+    const id = postJSON["id"];
+
     var like_OR_dislike = ""
     if(liked){
         like_OR_dislike = "Dislike";
     }else{
         like_OR_dislike = "Like";
     }
-    // const likes = "100";
+
+
     let postHTML = "";
-    postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"LIKE_FUNCTION()\">Like <3</button><br><br><hr></span>";
+    // postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"likePost()\">Like <3</button><br><br><hr></span>";
+    postHTML += "<span><b>" + username + "</b>: - " + title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\" onclick=\"likePost('" + username + "', " + id + ")\">Like <3</button><br><br><hr></span>";
+    // postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br>" + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"likePost(" + username + ", " + id + ")\">Like<br></button></span>";
     return postHTML;
 }
 
