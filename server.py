@@ -191,9 +191,9 @@ def username():
     auth_token = request.cookies.get("auth_token")
     token_check, username = authenticate("", "", auth_token, False)
     response = app.response_class(
-        response=username,
+        response=str(json.dumps(username)),
         status=200,
-        mimetype='text/plain'
+        mimetype='application/json'
     )
     return response
 if __name__ == '__main__':

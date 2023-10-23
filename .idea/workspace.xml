@@ -7,7 +7,9 @@
     <list default="true" id="8ad766ca-9088-4236-b69a-40e397d87154" name="Changes" comment="Added HttpOnly directive for auth cookie">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/make_post.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/make_post.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/app.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/app.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +96,7 @@
       <workItem from="1698029225255" duration="1442000" />
       <workItem from="1698032739644" duration="745000" />
       <workItem from="1698033542338" duration="9000" />
-      <workItem from="1698033607475" duration="852000" />
+      <workItem from="1698033607475" duration="2518000" />
     </task>
     <servers />
   </component>
@@ -124,6 +126,6 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Ending_from_the_Back$server.coverage" NAME="server Coverage Results" MODIFIED="1698029425846" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Ending_from_the_Back$server.coverage" NAME="server Coverage Results" MODIFIED="1698036136167" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

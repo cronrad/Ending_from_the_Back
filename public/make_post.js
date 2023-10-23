@@ -54,11 +54,6 @@ function postHTML(postJSON) {
     return postHTML;
 }
 
-function updateUser() {
-    const user = document.getElementById("user");
-    user.innerHTML = "";
-}
-
 function clearPost() {
     const posts = document.getElementById("posts");
     posts.innerHTML = "";
@@ -92,23 +87,10 @@ function sendPost() {
 
 function updatePost() {
 
-    let username = ""
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            username = this.response;
-        }
-    }
-    request.open("GET", "/username");
-    request.send();
-    let user = document.getElementById("user")
-    user.innerHTML += username
-
     let request2 = new XMLHttpRequest();
     request2.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             clearPost();
-            updateUser();
             const posts = JSON.parse(this.response);
             for (const post of posts) {
                 addPosts(post);
@@ -119,6 +101,7 @@ function updatePost() {
     request2.send();
 }
 
+
 function newPost() {
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
@@ -127,7 +110,18 @@ function newPost() {
     });
     document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center></h1>";
     document.getElementById("post-title-box").focus();
-    
+
+    let username = ""
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            username = JSON.parse(this.response);
+            document.getElementById("user").innerHTML += username
+        }
+    }
+    request.open("GET", "/username");
+    request.send();
+
     updatePost();
     setInterval(updatePost, 1000);
 
