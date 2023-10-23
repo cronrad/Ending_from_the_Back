@@ -30,9 +30,6 @@ function likePost(username, id) {
     updatePost();
 }
 
-
-
-
 function postHTML(postJSON) {
     const username = postJSON.username;
     const title = postJSON["title"];
@@ -89,8 +86,9 @@ function sendPost() {
 }
 
 function updatePost() {
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
+
+    let request2 = new XMLHttpRequest();
+    request2.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             clearPost();
             const posts = JSON.parse(this.response);
@@ -99,9 +97,10 @@ function updatePost() {
             }
         }
     }
-    request.open("GET", "/posts");
-    request.send();
+    request2.open("GET", "/posts");
+    request2.send();
 }
+
 
 function newPost() {
     document.addEventListener("keypress", function (event) {
@@ -109,10 +108,21 @@ function newPost() {
             sendPost();
         }
     });
-
     document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
+    let username = ""
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            username = JSON.parse(this.response);
+            document.getElementById("user").innerHTML += username
+        }
+    }
+    request.open("GET", "/username");
+    request.send();
+
     updatePost();
     setInterval(updatePost, 1000);
+
 }

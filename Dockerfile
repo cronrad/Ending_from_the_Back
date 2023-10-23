@@ -3,9 +3,9 @@ ENV HOME /root
 WORKDIR /root
 COPY . .
 # Download dependancies
-RUN pip3 install pymongo
-RUN pip3 install
+RUN pip install pymongo
 RUN pip install bcrypt
+RUN pip install flask
 
 EXPOSE 8080
 EXPOSE 27017

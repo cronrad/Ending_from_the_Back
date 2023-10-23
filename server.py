@@ -97,8 +97,8 @@ def new_post():
             return response
         else:
             #Adds the post to database
-            title = body.get("title")
-            description = body.get("description")
+            title = HTMLescaper(body.get("title"))
+            description = HTMLescaper(body.get("description"))
             #Find the next ID available
             cur = postDB.find()
             id = 0
@@ -190,5 +190,16 @@ def like_post():
 
             # return response #The http response shouldn't change the page but you can still see this response in the network tab
 
+@app.route('/username', methods=['GET'])
+def username():
+    #This sends the username from backend to frontend for displaying once user is logged in
+    auth_token = request.cookies.get("auth_token")
+    token_check, username = authenticate("", "", auth_token, False)
+    response = app.response_class(
+        response=str(json.dumps(username)),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 if __name__ == '__main__':
    app.run(host='0.0.0.0', port=8080, debug=True)
