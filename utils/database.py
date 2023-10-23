@@ -2,8 +2,8 @@ import secrets
 import bcrypt
 from pymongo import MongoClient
 
-mongoClient = MongoClient("localhost") #For testing only
-#mongoClient = MongoClient("mongo")
+# mongoClient = MongoClient("localhost") #For testing only
+mongoClient = MongoClient("mongo")
 
 db = mongoClient["cse312_project"]
 authDB = db["auth"]

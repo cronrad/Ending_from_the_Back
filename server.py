@@ -71,6 +71,11 @@ def login():
 @app.route('/new_post', methods=['POST'])
 def new_post():
     body = json.loads(request.get_data())
+
+    username = request.form.get("username_login")
+    password = request.form.get("password_login")
+    token, username = authenticate(username, password, None, True)
+
     #Checks for authentication
     if request.cookies.get("auth_token") == None:
         response = app.response_class(
@@ -159,7 +164,7 @@ def like_post():
         else:
             #Adds like to the post in database
             id = body.get("id")
-            username = body.get("username")
+            token_check, username = authenticate("", "", auth_token, False)
 
             cur = postDB.find_one({"id": id})
             if username not in cur["likes"]:
