@@ -10,12 +10,50 @@ function logOut() {
     request.send(JSON.stringify(username));
 }
 
+function likePost(username, id) {
+    var request = new XMLHttpRequest();
+
+    request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+            if (request.status == 200) {
+                console.log('POST request successful');
+            } else {
+                console.error('POST request failed');
+            }
+        }
+    };
+
+    var data = {"id": id, "username" : username}
+
+    request.open('POST', '/like_post');
+    request.send(JSON.stringify(data));
+    updatePost();
+}
+
+
+
+
 function postHTML(postJSON) {
     const username = postJSON.username;
     const title = postJSON["title"];
     const description = postJSON["description"];
+    // const likes = postJSON["likes"].size();
+    const likes = postJSON["likes"].length;
+    const liked = postJSON["likes"].includes(username);
+    const id = postJSON["id"];
+
+    var like_OR_dislike = ""
+    if(liked){
+        like_OR_dislike = "Dislike";
+    }else{
+        like_OR_dislike = "Like";
+    }
+
+
     let postHTML = "";
-    postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br><br></span>";
+    // postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"likePost()\">Like <3</button><br><br><hr></span>";
+    postHTML += "<span><b>" + username + "</b>: - " + title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\" onclick=\"likePost('" + username + "', " + id + ")\">Like <3</button><br><br><hr></span>";
+    // postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br>" + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"likePost(" + username + ", " + id + ")\">Like<br></button></span>";
     return postHTML;
 }
 
@@ -37,13 +75,14 @@ function sendPost() {
     const description = postDescriptionBox.value;
     postTitleBox.value = "";
     postDescriptionBox.value = "";
+    const likes = 0
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const postJSON = {"title": title, "description": description};
+    const postJSON = {"title": title, "description": description, "likes": likes};
     request.open("POST", "/new_post");
     request.send(JSON.stringify(postJSON));
     postTitleBox.focus();
