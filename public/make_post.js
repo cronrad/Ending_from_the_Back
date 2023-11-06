@@ -1,3 +1,22 @@
+const ws = true;
+let socket = null;
+
+function initWS() {
+    // Establish a WebSocket connection with the server
+    socket = io.connect('ws://' + window.location.host, { transports: ["websocket"] });
+
+    // Called whenever data is received from the server over the WebSocket connection
+    socket.on('message', (ws_message) => {
+        const message = JSON.parse(ws_message.data);
+        const messageType = message.messageType
+        if(messageType === 'chatMessage'){
+            addMessageToChat(message);
+        }else{
+            // send message to WebRTC
+            processMessageAsWebRTC(message, messageType);
+        }
+    });
+}
 function logOut() {
     let username = ""
     const request = new XMLHttpRequest();
@@ -65,27 +84,47 @@ function addPosts(postJSON) {
 
 }
 
-//Modify to support if user selects an image to upload
+//This should be the only function modified to support websockets over ajax
 function sendPost() {
     const postTitleBox = document.getElementById("post-title-box");
     const postDescriptionBox = document.getElementById("post-description-box");
+    let fileInput = document.getElementById("form-file");
+    let file = fileInput.files[0];
+
+    let reader = new FileReader()
+    reader.onload = function () {
+        const fileData = {
+            type: "file",
+            name: file.name,
+            content: reader.result
+        };
+
+    let jsonObj = {"title": title, "description": description, "likes": likes, "file": fileData};
     const title = postTitleBox.value;
     const description = postDescriptionBox.value;
     postTitleBox.value = "";
     postDescriptionBox.value = "";
-    const likes = 0
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            console.log(this.response);
+
+    if (ws) {
+        socket.emit('message', JSON.stringify(jsonObj))
+    }
+    else { //This code shouldn't run for part 3 and onwards
+        const likes = 0
+        const request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+            if (this.readyState === 4 && this.status === 200) {
+                console.log(this.response);
+            }
+        }
+        let postJSON = {"title": title, "description": description, "likes": likes};
+        request.open("POST", "/new_post");
+        request.send(JSON.stringify(postJSON));
+        postTitleBox.focus();
         }
     }
-    const postJSON = {"title": title, "description": description, "likes": likes};
-    request.open("POST", "/new_post");
-    request.send(JSON.stringify(postJSON));
-    postTitleBox.focus();
 }
 
+//With websockets, this is only called on page load to load existing question posts
 function updatePost() {
 
     let request2 = new XMLHttpRequest();
@@ -102,7 +141,6 @@ function updatePost() {
     request2.send();
 }
 
-
 function newPost() {
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
@@ -117,7 +155,7 @@ function newPost() {
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             username = JSON.parse(this.response);
-            if (username === false){
+            if (username === false) {
                 username = "Guest"
             }
             document.getElementById("user").innerHTML += username
@@ -127,6 +165,12 @@ function newPost() {
     request.send();
 
     updatePost();
-    setInterval(updatePost, 1000);
 
+    if (ws) {
+        initWS();
+    }
+    else{ //This code shouldn't run part 3 and onwards
+        setInterval(updatePost, 1000);
+    }
 }
+

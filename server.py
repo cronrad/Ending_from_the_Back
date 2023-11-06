@@ -5,6 +5,7 @@ import bson.json_util as json_util
 from flask_socketio import SocketIO
 
 app = Flask(__name__, static_folder='public')
+socketio = SocketIO(app, transports='websocket')
 
 @app.after_request
 def addHeader(response): #Applies no sniff header
@@ -209,5 +210,13 @@ def username():
         mimetype='application/json'
     )
     return response
+
+@socketio.on('message')
+def handle_websocket():
+    print("Websocket Connection Received")
+
+
+
+
 if __name__ == '__main__':
-   app.run(host='0.0.0.0', port=8080, debug=True)
+   socketio.run(app, host='0.0.0.0', port=8080, debug=True, allow_unsafe_werkzeug=True)
