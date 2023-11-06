@@ -2,6 +2,7 @@ from flask import *
 from utils.database import *
 import json
 import bson.json_util as json_util
+from flask_socketio import SocketIO
 
 app = Flask(__name__, static_folder='public')
 

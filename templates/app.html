@@ -18,12 +18,18 @@
         <div id="user">Username:
         </div>
         <label>
-            Title:
+            Question Title:
             <input id="post-title-box" type="text"><br><br>
-            Description:
+            Question Description:
             <input id="post-description-box" type="text"><br><br>
         </label>
-        <button id="post-button" onclick="sendPost()">Post</button><br>
+        <form action="/profile-pic" id="image-form" method="post" enctype="multipart/form-data">
+            <br/>
+            <label for="form-file">Upload picture for your question</label>
+            <input id="form-file" type="file" name="upload">
+            <br/>
+        </form>
+        <button id="post-button" onclick="sendPost()">Post</button><br> <!-- Have to modify javascript so that it will also send a picture if it is selected -->
         <button id="logout-button" onclick="logOut()">Logout</button><br><br><br><br>
     </div>
     <div id="posts">

@@ -2,14 +2,14 @@ import secrets
 import bcrypt
 from pymongo import MongoClient
 
-#mongoClient = MongoClient("localhost") #For testing only
-mongoClient = MongoClient("mongo")
+mongoClient = MongoClient("localhost") #For testing only
+#mongoClient = MongoClient("mongo")
 
 db = mongoClient["cse312_project"]
 authDB = db["auth"]
 postDB = db["post"]
 
-#HTML escaper function #TODO: Perent encoding?
+#HTML escaper function #TODO: Percent encoding?
 #Author: Gordon Tang
 #Inputs: String
 #Outputs: String that has escaped html characters
@@ -48,7 +48,7 @@ def authenticate(username, password, token, ignore_token):
         password == None
     if token == "":
         token == None
-    safe_username = HTMLescaper(username) #TODO: Check when to call HTML escape
+    safe_username = HTMLescaper(username)
     if token == None or ignore_token == True: #No token or ignoring token means user must supply username and password
         exists = authDB.find_one({"username": safe_username})
         if exists == None: #Username doesn't exist in db, don't authenticate

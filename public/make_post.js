@@ -65,6 +65,7 @@ function addPosts(postJSON) {
 
 }
 
+//Modify to support if user selects an image to upload
 function sendPost() {
     const postTitleBox = document.getElementById("post-title-box");
     const postDescriptionBox = document.getElementById("post-description-box");
@@ -108,7 +109,7 @@ function newPost() {
             sendPost();
         }
     });
-    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>Make your new Post here!!!</b></center></h1>";
+    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>CSE312 Quiz App</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
     let username = ""
@@ -116,6 +117,9 @@ function newPost() {
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             username = JSON.parse(this.response);
+            if (username === false){
+                username = "Guest"
+            }
             document.getElementById("user").innerHTML += username
         }
     }
