@@ -78,3 +78,4 @@ def authenticate(username, password, token, ignore_token):
             return False, False
         elif userDoc != None: #Found token that matches user
             return token, userDoc["username"]
+

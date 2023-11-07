@@ -93,43 +93,36 @@ function sendPost() {
     console.log(file)
 
     if (file !== undefined){
-        let reader = new FileReader()
+        let reader = new FileReader();
         reader.onload = function () {
-        const fileData = {
-            name: file.name,
-            content: reader.result
-        };
+            const arrayBuffer = reader.result;  // The ArrayBuffer
+            const uint8Array = new Uint8Array(arrayBuffer);
+            const fileData = {
+                name: file.name,
+                content: Array.from(uint8Array)  // Convert to a plain JavaScript array
+            };
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
-        let jsonObj = {"title": title, "description": description, "file": fileData};
+        const jsonObj = {
+            title: title,
+            description: description,
+            file: fileData
+        };
+
         postTitleBox.value = "";
         postDescriptionBox.value = "";
 
         console.log("websocket");
         socket.emit('message', JSON.stringify(jsonObj));
-        /*else { //This code shouldn't run for part 3 and onwards
-            console.log("else")
-            const likes = 0
-            const request = new XMLHttpRequest();
-            request.onreadystatechange = function () {
-                if (this.readyState === 4 && this.status === 200) {
-                    console.log(this.response);
-                }
-            }
-            let postJSON = {"title": title, "description": description, "likes": likes};
-            request.open("POST", "/new_post");
-            request.send(JSON.stringify(postJSON));
-            postTitleBox.focus();
-            }*/
         };
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
         document.getElementById("form-file").value = null;
     }
     else{
         console.log("no file upload detected")
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
-        let jsonObj = {"title": title, "description": description, "file": null};
+        let jsonObj = {"title": title, "description": description, "file": "null"};
         socket.emit('message', JSON.stringify(jsonObj))
         postTitleBox.value = "";
         postDescriptionBox.value = "";

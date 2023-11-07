@@ -215,6 +215,15 @@ def username():
 @socketio.on('message')
 def handle_websocket(data):
     print(data)
+    data = json.loads(data)
+    if data["file"] != "null":  # File upload along with the text
+        file_dict = data["file"]
+        file_content = bytearray(file_dict["content"])
+        print(file_content)
+        with open("image1", 'wb') as file:
+            file.write(file_content)
+    elif data.get("file") == null:  # No image upload with the text
+        print("no image")
 
 
 
