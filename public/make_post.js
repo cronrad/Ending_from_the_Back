@@ -90,37 +90,50 @@ function sendPost() {
     const postDescriptionBox = document.getElementById("post-description-box");
     let fileInput = document.getElementById("form-file");
     let file = fileInput.files[0];
+    console.log(file)
 
-    let reader = new FileReader()
-    reader.onload = function () {
+    if (file !== undefined){
+        let reader = new FileReader()
+        reader.onload = function () {
         const fileData = {
-            type: "file",
             name: file.name,
             content: reader.result
         };
+        const title = postTitleBox.value;
+        const description = postDescriptionBox.value;
+        let jsonObj = {"title": title, "description": description, "file": fileData};
+        postTitleBox.value = "";
+        postDescriptionBox.value = "";
 
-    let jsonObj = {"title": title, "description": description, "likes": likes, "file": fileData};
-    const title = postTitleBox.value;
-    const description = postDescriptionBox.value;
-    postTitleBox.value = "";
-    postDescriptionBox.value = "";
-
-    if (ws) {
-        socket.emit('message', JSON.stringify(jsonObj))
-    }
-    else { //This code shouldn't run for part 3 and onwards
-        const likes = 0
-        const request = new XMLHttpRequest();
-        request.onreadystatechange = function () {
-            if (this.readyState === 4 && this.status === 200) {
-                console.log(this.response);
+        console.log("websocket");
+        socket.emit('message', JSON.stringify(jsonObj));
+        /*else { //This code shouldn't run for part 3 and onwards
+            console.log("else")
+            const likes = 0
+            const request = new XMLHttpRequest();
+            request.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    console.log(this.response);
+                }
             }
-        }
-        let postJSON = {"title": title, "description": description, "likes": likes};
-        request.open("POST", "/new_post");
-        request.send(JSON.stringify(postJSON));
-        postTitleBox.focus();
-        }
+            let postJSON = {"title": title, "description": description, "likes": likes};
+            request.open("POST", "/new_post");
+            request.send(JSON.stringify(postJSON));
+            postTitleBox.focus();
+            }*/
+        };
+        reader.readAsDataURL(file);
+        document.getElementById("form-file").value = null;
+    }
+    else{
+        console.log("no file upload detected")
+        const title = postTitleBox.value;
+        const description = postDescriptionBox.value;
+        let jsonObj = {"title": title, "description": description, "file": null};
+        socket.emit('message', JSON.stringify(jsonObj))
+        postTitleBox.value = "";
+        postDescriptionBox.value = "";
+        document.getElementById("form-file").value = null;
     }
 }
 

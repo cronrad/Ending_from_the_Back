@@ -3,6 +3,7 @@ from utils.database import *
 import json
 import bson.json_util as json_util
 from flask_socketio import SocketIO
+from base64 import b64decode
 
 app = Flask(__name__, static_folder='public')
 socketio = SocketIO(app, transports='websocket')
@@ -212,8 +213,8 @@ def username():
     return response
 
 @socketio.on('message')
-def handle_websocket():
-    print("Websocket Connection Received")
+def handle_websocket(data):
+    print(data)
 
 
 

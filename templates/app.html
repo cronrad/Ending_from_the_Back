@@ -20,17 +20,15 @@
         </div>
         <label>
         </label>
-        <form action="/submit" id="image-form" method="post" enctype="multipart/form-data">
-            Question Title:
-            <input id="post-title-box" type="text"><br><br>
-            Question Description:
-            <input id="post-description-box" type="text"><br><br>
-            <br/>
-            <label for="form-file">Upload picture for your question</label>
-            <input id="form-file" type="file" name="upload">
-            <br/>
-            <button id="post-button" onclick="sendPost()">Post Question</button><br> <!-- Have to modify javascript so that it will also send a picture if it is selected -->
-        </form>
+        Question Title:
+        <input id="post-title-box" type="text"><br><br>
+        Question Description:
+        <input id="post-description-box" type="text"><br><br>
+        <br/>
+        <label for="form-file">Upload picture for your question</label>
+        <input id="form-file" type="file" name="upload">
+        <br/>
+        <button id="post-button" onclick="sendPost()">Post Question</button><br> <!-- Have to modify javascript so that it will also send a picture if it is selected -->
         <button id="logout-button" onclick="logOut()">Logout</button><br><br><br><br>
     </div>
     <div id="posts">
