@@ -4,9 +4,12 @@ import json
 import bson.json_util as json_util
 from flask_socketio import SocketIO
 from base64 import b64decode
+import os
 
 app = Flask(__name__, static_folder='public')
 socketio = SocketIO(app, transports='websocket')
+authenticated_connections = {}
+guest_connections = {}
 
 @app.after_request
 def addHeader(response): #Applies no sniff header
@@ -212,19 +215,48 @@ def username():
     )
     return response
 
-@socketio.on('message')
-def handle_websocket(data):
-    print(data)
-    data = json.loads(data)
-    if data["file"] != "null":  # File upload along with the text
-        file_dict = data["file"]
-        file_content = bytearray(file_dict["content"])
-        print(file_content)
-        with open("image1", 'wb') as file:
-            file.write(file_content)
-    elif data.get("file") == null:  # No image upload with the text
-        print("no image")
+#This is where the http request for a 101 switching protocol occurs
+#We authenticate the user here and tie their websocket connection session to their username here
+@socketio.on('connect')
+def initialConnection():
+    auth_token = request.cookies.get("auth_token")
+    token, username = authenticate("", "", auth_token, False)
+    if guest_connections.get("counter") == None:
+        guest_connections["counter"] = 0
+    if username != False: #Authenticated user
+        authenticated_connections[username] = request.sid
+    elif username == False: #Unauthenticated user, will only be able to view
+        guest_key = "Guest" + str(guest_connections["counter"])
+        guest_connections["counter"] += 1
+        guest_connections[guest_key] = request.sid
 
+
+#This is the endpoint for when a post is made
+#To send a message to ALL websocket connections, do emit(*message data stuff here*,broadcast=True)
+@socketio.on('message')
+def handleWebsocket(data):
+    print(data)
+    #Find the username of the current connection?
+    username = None
+    for i in authenticated_connections:
+        if authenticated_connections[i] == request.sid:
+            username = i
+    if username == None: #Don't allow post
+        print("") #TODO: Figure out response
+    else: #Assume user
+        #Load the data
+        data = json.loads(data)
+        if data["file"] != "null":  # File upload along with the text
+            #Save the file
+            file_name = saveFile(username, data) #this saves the file and returns a file name to be used to request on client side
+            #Store the text data in db and get response object
+            #TODO: Currently not sure how exactly we plan for the client to handle messages or what format we should use
+            #TODO: Look into adding on file name for the client to request that image using js?
+            response = handlePost(username, data["title"], data["description"], data["answer"])
+        elif data.get("file") == "null":  # No image upload with the text
+            #Store the text data in db and get response object
+            response = handlePost(username, data["title"], data["description"], data["answer"])
+            #TODO: Currently not sure how exactly we plan for the client to handle messages or what format we should use
 
 
 

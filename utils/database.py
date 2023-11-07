@@ -1,5 +1,6 @@
 import secrets
 import bcrypt
+import os
 from pymongo import MongoClient
 
 mongoClient = MongoClient("localhost") #For testing only
@@ -8,6 +9,7 @@ mongoClient = MongoClient("localhost") #For testing only
 db = mongoClient["cse312_project"]
 authDB = db["auth"]
 postDB = db["post"]
+fileDB = db["file"]
 
 #HTML escaper function #TODO: Percent encoding?
 #Author: Gordon Tang
@@ -79,3 +81,50 @@ def authenticate(username, password, token, ignore_token):
         elif userDoc != None: #Found token that matches user
             return token, userDoc["username"]
 
+#Takes the websocket post data and stores the data in the db
+#Returns a object that will be broadcasted to all websocket connection
+#Author: Gordon Tang
+def handlePost(username, title, description, answer):
+    #Finds or creates the post id system in the postDB collection
+    postIDs = postDB.find_one({"messageIDCounter": {"$exists": True}})
+    if postIDs == None:  # First message in db
+        postDB.insert_one({"messageIDCounter": 1})
+    #Inserts the post data into the db
+    postID = postDB.find_one({"messageIDCounter": {"$exists": True}})
+    postDB.insert_one({"messageID": postID["messageIDCounter"], "username": username, "title": title, "description": description, "answer": answer})
+    postDB.update_one({}, {"$inc": {"messageIDCounter": 1}})
+    #Create the response json
+    response = {"username": username, "title": title, "description": description}
+    return response
+
+
+#Takes a the file name of a file that has been uploaded and a username, takes only username since this is for websockets
+#Returns the name of the file that will be saved if token is valid and file gets saved, otherwise False
+#Author: Gordon Tang
+def setFileID(username, originalFileName):
+    #Retrieve the user's doc
+    #Create/Retrieve the latest file ID
+    fileIDs = fileDB.find_one({"fileNameCounter": {"$exists": True}})
+    if fileIDs == None:
+        fileDB.insert_one({"fileIDCounter": 1})
+    #Set the person's doc to have a file name id
+    fileID = fileDB.find_one({"fileIDCounter": {"$exists": True}})
+    fileName = "image" + str(fileID["fileIDCounter"]) + ".jpg"
+    #Set the file id in the file db
+    fileDB.insert_one({"original": originalFileName, "new": fileName})
+    #Increment the next ID
+    fileDB.update_one({}, {"$inc": {"fileIDCounter": 1}})
+    return fileName
+
+#Takes the file dictionary and username and saves a file
+#Author: Gordon Tang
+def saveFile(username, data):
+    file_dict = data["file"]
+    # Get the actual data of the file
+    file_content = bytearray(file_dict["content"])
+    # Get the new file name
+    file_name = setFileID(username, file_dict["name"])
+    filePath = os.path.join('public/image/', file_name)
+    with open(filePath, 'wb') as file:
+        file.write(file_content)
+    return file_name

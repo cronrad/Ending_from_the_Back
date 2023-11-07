@@ -88,6 +88,7 @@ function addPosts(postJSON) {
 function sendPost() {
     const postTitleBox = document.getElementById("post-title-box");
     const postDescriptionBox = document.getElementById("post-description-box");
+    const postAnswerBox = document.getElementById("post-answer-key-box");
     let fileInput = document.getElementById("form-file");
     let file = fileInput.files[0];
     console.log(file)
@@ -103,14 +104,17 @@ function sendPost() {
             };
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
+        const answer = postAnswerBox.value;
         const jsonObj = {
             title: title,
             description: description,
+            answer: answer,
             file: fileData
         };
 
         postTitleBox.value = "";
         postDescriptionBox.value = "";
+        postAnswerBox.value = "";
 
         console.log("websocket");
         socket.emit('message', JSON.stringify(jsonObj));
