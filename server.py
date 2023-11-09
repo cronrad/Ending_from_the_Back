@@ -2,7 +2,7 @@ from flask import *
 from utils.database import *
 import json
 import bson.json_util as json_util
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from base64 import b64decode
 import os
 
@@ -250,13 +250,16 @@ def handleWebsocket(data):
             #Save the file
             file_name = saveFile(username, data) #this saves the file and returns a file name to be used to request on client side
             #Store the text data in db and get response object
-            #TODO: Currently not sure how exactly we plan for the client to handle messages or what format we should use
-            #TODO: Look into adding on file name for the client to request that image using js?
             response = handlePost(username, data["title"], data["description"], data["answer"])
+            response["file_name"] = file_name
+            response = json.dumps(response)
+            emit(response, broadcast=True)
         elif data.get("file") == "null":  # No image upload with the text
             #Store the text data in db and get response object
             response = handlePost(username, data["title"], data["description"], data["answer"])
-            #TODO: Currently not sure how exactly we plan for the client to handle messages or what format we should use
+            response["file_name"] = "None"
+            response = json.dumps(response)
+            emit(response, broadcast=True)
 
 
 
