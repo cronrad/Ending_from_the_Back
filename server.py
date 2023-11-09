@@ -243,7 +243,7 @@ def handleWebsocket(data):
         if authenticated_connections[i] == request.sid:
             username = i
     if username == None: #Don't allow post
-        print("") #TODO: Figure out response
+            socketio.emit("message", "Guest")
     else: #Assume user
         #Load the data
         data = json.loads(data)

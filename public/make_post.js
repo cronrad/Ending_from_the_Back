@@ -7,16 +7,23 @@ function initWS() {
 
     // Called whenever data is received from the server over the WebSocket connection
     socket.on('message', (ws_message) => {
+    if(ws_message == "Guest"){
+        alert("Login To Post A Question!");
+    }
+    else{
         const message = JSON.parse(ws_message.data);
+        console.log(message)
         const messageType = message.messageType
         if(messageType === 'chatMessage'){
-            addMessageToChat(message);
-        }else{
-            // send message to WebRTC
-            processMessageAsWebRTC(message, messageType);
-        }
-    });
+            addPosts(message);
+    }
+    }
+    
+});
 }
+
+
+
 function logOut() {
     let username = ""
     const request = new XMLHttpRequest();
@@ -175,7 +182,6 @@ function newPost() {
     }
     request.open("GET", "/username");
     request.send();
-
     updatePost();
 
     if (ws) {
