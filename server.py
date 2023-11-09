@@ -111,13 +111,14 @@ def new_post():
             #Adds the post to database
             title = HTMLescaper(body.get("title"))
             description = HTMLescaper(body.get("description"))
+            answer = HTMLescaper(body.get("answer"))
             #Find the next ID available
             cur = postDB.find()
             id = 0
             for i in cur:
                 if(i["id"] >= id):
                     id = i["id"] + 1
-            postDB.insert_one({"id": id, "title": title, "description": description, "username": username, "likes": []})
+            postDB.insert_one({"id": id, "title": title, "description": description, "username": username, "answer": answer, "likes": []})
             response = app.response_class(
                 response="Post submitted",
                 status=200,
