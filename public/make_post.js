@@ -126,10 +126,12 @@ function sendPost() {
         console.log("no file upload detected")
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
-        let jsonObj = {"title": title, "description": description, "file": "null"};
+        const answer = postAnswerBox.value;
+        let jsonObj = {"title": title, "description": description, "answer": answer, "file": "null"};
         socket.emit('message', JSON.stringify(jsonObj))
         postTitleBox.value = "";
         postDescriptionBox.value = "";
+        postAnswerBox.value = "";
         document.getElementById("form-file").value = null;
     }
 }
