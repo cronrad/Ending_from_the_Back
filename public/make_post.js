@@ -22,6 +22,8 @@ function initWS() {
     });
      */
 }
+
+
 function logOut() {
     let username = ""
     const request = new XMLHttpRequest();
@@ -219,7 +221,6 @@ function newPost() {
     }
     request.open("GET", "/username");
     request.send();
-
     updatePost();
 
     if (ws) {
