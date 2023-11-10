@@ -5,6 +5,8 @@ import bson.json_util as json_util
 from flask_socketio import SocketIO, emit
 from base64 import b64decode
 import os
+from datetime import datetime
+import time
 
 app = Flask(__name__, static_folder='public')
 socketio = SocketIO(app, transports='websocket')
@@ -136,7 +138,7 @@ def posts():
         else:
             post_list.append(post)
     response = app.response_class(
-        response=str(json.dumps(post_list)),
+        response=str(json_util.dumps(post_list)),
         status=200,
         mimetype='application/json'
     )
@@ -284,7 +286,19 @@ def answeringWebsocket(data):
         emit('unauthenticated', room=request.sid) #room=request.sid to specify only this connection
     else: #Run actual code for objective 2 below here
         data = json.loads(data)
+        print(data)
+        socketio.sleep(5)                                                          #This is REQUIRED or the data we are getting is being printed in random order
+        enteringAnswers(username, data["answerID"], data["answerContent"])         #TODO: Need to complete data processing, adding it to database and other database logic
         return
+
+#Sending live time for each question
+@socketio.on('timer')                                                               #Timer endpoint
+def sendingTime():
+    start = datetime.now()
+    while (datetime.now() - start).seconds <= 10:
+        left = 10 - (datetime.now() - start).seconds
+        emit('timer', {"time": left}, room=request.sid)
+        socketio.sleep(1)
 
 
 if __name__ == '__main__':

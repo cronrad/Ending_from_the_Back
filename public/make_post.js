@@ -1,5 +1,6 @@
 const ws = true;
 let socket = null;
+let postList = [];
 
 function initWS() {
     // Establish a WebSocket connection with the server
@@ -15,6 +16,21 @@ function initWS() {
         alert("You are unauthenticated, you cannot post or answer questions")
     });
 
+    socket.on('timer', (tim) => {                                                             //Time listner to constantly refresh time and once time is 0 automatically submits
+        console.log(postList)                                                                 //the answers
+        if(tim.time == 0){
+            document.getElementById("timer").innerHTML = "Time left to answer the question: 0";
+            for(const x of postList){
+                socket.emit("answering", JSON.stringify({"answerID": x, "answerContent": document.getElementById("question"+x+"box").value}));     //This sends some duplicate data 
+            }                                                                                                                                      //that I will handle on server side
+            
+        }
+        else{
+            document.getElementById("timer").innerHTML = "Time left to answer the question: "+tim.time;        //This displays time left for questions to be answered in
+        }
+
+    });
+     
     //Template for receiving websocket data from client
     /*
     socket.on('answering', (ws_message) => {
@@ -25,7 +41,7 @@ function initWS() {
 
 
 function logOut() {
-    let username = ""
+    let username = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
@@ -49,7 +65,7 @@ function likePost(username, id) {
         }
     };
 
-    var data = {"id": id, "username" : username}
+    var data = {"id": id, "username" : username};
 
     request.open('POST', '/like_post');
     request.send(JSON.stringify(data));
@@ -61,25 +77,25 @@ function postHTML(postJSON) {
     const title = postJSON["title"];
     const description = postJSON["description"];
     let question_id = "question" + postJSON["postID"];
-    let image_name = postJSON["file_name"]
-    let question_button = question_id + "button"
-    let question_box = question_id + "box"
+    let image_name = postJSON["file_name"];
+    let question_button = question_id + "button";
+    let question_box = question_id + "box";
 
-    let html_string = ""
-    let beginning_html = "<div id=" + question_id + ">"
+    let html_string = "";
+    let beginning_html = "<div id=" + question_id + ">";
     let username_html = "<span><b>Username: </b>" + username + "<br>" ;
     let title_html = "<b>Title: </b>" + title + "<br><br>";
-    html_string += beginning_html + username_html + title_html
+    html_string += beginning_html + username_html + title_html;
     if (image_name !== undefined && image_name !== null) {
-        let image_string = "<img src='public/image/" + image_name + "'><br>"
-        html_string += image_string
+        let image_string = "<img src='public/image/" + image_name + "'><br>";
+        html_string += image_string;
     }
     let description_html = "<b>Description: </b>" + description + "<br>";
-    let submit_box_html = "<input id='" + question_box + "' type='text'>"
-    let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button>"
-    let ending_html = "</span></div><br><br>"
+    let submit_box_html = "<input id='" + question_box + "' type='text'>";
+    let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button>";
+    let ending_html = "</span></div><br><br>";
     html_string += description_html + submit_box_html + submit_html + ending_html;
-    return html_string
+    return html_string;
 
     /*
     const username = postJSON.username;
@@ -114,6 +130,11 @@ function clearPost() {
 function addPosts(postJSON) {
     const posts = document.getElementById("posts");
     posts.innerHTML += postHTML(postJSON);
+    let html = postHTML(postJSON)
+    console.log(postHTML(postJSON));
+    let regex = /id='question(\d+)box'/;
+    let match = html.match(regex);
+    postList.push(match[1]);
 }
 
 //This should be the only function modified to support websockets over ajax
@@ -157,7 +178,7 @@ function sendPost() {
         const description = postDescriptionBox.value;
         const answer = postAnswerBox.value;
         let jsonObj = {"title": title, "description": description, "answer": answer, "file": "null"};
-        socket.emit('message', JSON.stringify(jsonObj))
+        socket.emit('message', JSON.stringify(jsonObj));
         postTitleBox.value = "";
         postDescriptionBox.value = "";
         postAnswerBox.value = "";
@@ -167,11 +188,11 @@ function sendPost() {
 
 //Called when a user wants to submit their answer
 function submitAnswer(id){
-    let text_box_id = id.slice(0, -6)
-    text_box_id = text_box_id + "box"
-    let text_box_content = document.getElementById(text_box_id)
-    let jsonObj = {"answerID": id.slice(8, -6), "answerContent": text_box_content}
-    socket.emit('answering', JSON.stringify(jsonObj))
+    let text_box_id = id.slice(0, -6);
+    text_box_id = text_box_id + "box";
+    let text_box_content = document.getElementById(text_box_id).value;
+    let jsonObj = {"answerID": id.slice(8, -6), "answerContent": text_box_content};
+    socket.emit('answering', JSON.stringify(jsonObj));
 }
 
 //With websockets, this is only called on page load to load existing question posts
@@ -184,6 +205,8 @@ function updatePost() {
             const posts = JSON.parse(this.response);
             for (const post of posts) {
                 addPosts(post);
+                document.getElementById('timer').innerHTML = "";
+                socket.emit('timer');
             }
         }
     }
@@ -200,15 +223,15 @@ function newPost() {
     document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>CSE312 Quiz App</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
-    let username = ""
+    let username = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             username = JSON.parse(this.response);
             if (username === false) {
-                username = "Guest"
+                username = "Guest";
             }
-            document.getElementById("user").innerHTML += username
+            document.getElementById("user").innerHTML += username;
         }
     }
     request.open("GET", "/username");

@@ -128,3 +128,10 @@ def saveFile(username, data):
     with open(filePath, 'wb') as file:
         file.write(file_content)
     return file_name
+
+
+#TODO: Function will enter the data we received into database
+def enteringAnswers(username, answerID, answerContent):
+    print(username)
+    print(answerContent)
+    print(answerID)
