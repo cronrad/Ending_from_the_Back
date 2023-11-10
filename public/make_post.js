@@ -57,8 +57,6 @@ function likePost(username, id) {
 }
 
 function postHTML(postJSON) {
-    console.log("parsing received message")
-    console.log(postJSON)
     const username = postJSON.username;
     const title = postJSON["title"];
     const description = postJSON["description"];
@@ -66,11 +64,6 @@ function postHTML(postJSON) {
     let image_name = postJSON["file_name"]
     let question_button = question_id + "button"
     let question_box = question_id + "box"
-
-    console.log(username)
-    console.log(title)
-    console.log(description)
-    console.log(image_name)
 
     let html_string = ""
     let beginning_html = "<div id=" + question_id + ">"
@@ -160,7 +153,6 @@ function sendPost() {
         document.getElementById("form-file").value = null;
     }
     else{
-        console.log("no file upload detected")
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
         const answer = postAnswerBox.value;
@@ -178,7 +170,7 @@ function submitAnswer(id){
     let text_box_id = id.slice(0, -6)
     text_box_id = text_box_id + "box"
     let text_box_content = document.getElementById(text_box_id)
-    let jsonObj = {"answerID": id.slice(0, -6), "answerContent": text_box_content}
+    let jsonObj = {"answerID": id.slice(8, -6), "answerContent": text_box_content}
     socket.emit('answering', JSON.stringify(jsonObj))
 }
 

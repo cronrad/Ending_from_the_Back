@@ -116,7 +116,7 @@ def setFileID(username, originalFileName):
     fileDB.update_one({}, {"$inc": {"fileIDCounter": 1}})
     return fileName
 
-#Takes the file dictionary and username and saves a file
+#Takes the file part of the dictionary and username and saves a file
 #Author: Gordon Tang
 def saveFile(username, data):
     file_dict = data["file"]

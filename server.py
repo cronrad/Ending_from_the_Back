@@ -249,7 +249,7 @@ def handleDisconnection():
 @socketio.on('message')
 def handleWebsocket(data):
     print(data)
-    #Find the username of the current connection?
+    #Find the username of the current connection
     username = None
     for i in authenticated_connections:
         if authenticated_connections[i] == request.sid:
@@ -281,8 +281,8 @@ def answeringWebsocket(data):
         if authenticated_connections[i] == request.sid:
             username = i
     if username == None: #Don't allow post
-        emit('unauthenticated', room=request.sid)
-    else: #Run actual code below here
+        emit('unauthenticated', room=request.sid) #room=request.sid to specify only this connection
+    else: #Run actual code for objective 2 below here
         data = json.loads(data)
         return
 
