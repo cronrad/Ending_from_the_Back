@@ -10,6 +10,8 @@ db = mongoClient["cse312_project"]
 authDB = db["auth"]
 postDB = db["post"]
 fileDB = db["file"]
+answDB = db["answ"]
+gradeDB = db["grade"]
 
 #HTML escaper function #TODO: Percent encoding?
 #Author: Gordon Tang
@@ -116,8 +118,7 @@ def setFileID(username, originalFileName):
     fileDB.update_one({}, {"$inc": {"fileIDCounter": 1}})
     return fileName
 
-#Takes the file part of the dictionary and username and saves a file
-#Author: Gordon Tang
+
 def saveFile(username, data):
     file_dict = data["file"]
     # Get the actual data of the file
@@ -130,8 +131,30 @@ def saveFile(username, data):
     return file_name
 
 
-#TODO: Function will enter the data we received into database
-def enteringAnswers(username, answerID, answerContent):
-    print(username)
-    print(answerContent)
-    print(answerID)
+#Function will enter the data we received into database
+#Author: Aryan Kum / Sam Palutro
+def enteringAnswers(a_user, q_user, a_ID, q_ID, answerContent):
+    #a_user: the user answering the question
+    #q_user: the user who asked the question
+    answDB.insert_one({"a_user": a_user, "q_user": q_user, "a_id": a_ID, "q_id": q_ID, "answer": answerContent.lower()})
+
+#TODO: Function will grade and store for question
+#Author: Sam Palutro
+def gradeQuestion(q_id, answer):
+    answer = answer.lower()
+    q_query = {"q_id": q_id}
+    for i in answDB.find(q_query):
+        u_query = {"user": i["a_user"]}
+        if(i["answer"] == answer): #CORRECT ANSWER
+            if(gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
+                result = gradeDB.findone(u_query)
+                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"]+1, "corr": result["corr"]+1}})
+            else: #FIRST GRADE
+                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 1})
+        else: #WRONG ANSWER
+            if (gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
+                result = gradeDB.findone(u_query)
+                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"] + 1}})
+            else:#FIRST GRADE
+                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 0})
+
