@@ -84,17 +84,17 @@ def authenticate(username, password, token, ignore_token):
 #Takes the websocket post data and stores the data in the db
 #Returns a object that will be broadcasted to all websocket connection
 #Author: Gordon Tang
-def handlePost(username, title, description, answer):
+def handlePost(username, title, description, answer, file_name):
     #Finds or creates the post id system in the postDB collection
-    postIDs = postDB.find_one({"messageIDCounter": {"$exists": True}})
+    postIDs = postDB.find_one({"postIDCounter": {"$exists": True}})
     if postIDs == None:  # First message in db
-        postDB.insert_one({"messageIDCounter": 1})
+        postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
-    postID = postDB.find_one({"messageIDCounter": {"$exists": True}})
-    postDB.insert_one({"messageID": postID["messageIDCounter"], "username": username, "title": title, "description": description, "answer": answer})
-    postDB.update_one({}, {"$inc": {"messageIDCounter": 1}})
+    postID = postDB.find_one({"postIDCounter": {"$exists": True}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name})
     #Create the response json
-    response = {"username": username, "title": title, "description": description}
+    response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
+    postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
     return response
 
 

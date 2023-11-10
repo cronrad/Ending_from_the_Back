@@ -131,8 +131,10 @@ def posts():
     #This keeps track of all the posts and updates
     post_list = []
     for post in postDB.find({}):
-        post["_id"] = json_util.dumps(post["_id"])
-        post_list.append(post)
+        if "postIDCounter" in post: #ignores post id counter in db
+            continue
+        else:
+            post_list.append(post)
     response = app.response_class(
         response=str(json.dumps(post_list)),
         status=200,
@@ -231,9 +233,19 @@ def initialConnection():
         guest_connections["counter"] += 1
         guest_connections[guest_key] = request.sid
 
+#This is when the the websocket connection disconnects
+#We remove them from either of our own maintained dictionary of connections
+@socketio.on('disconnect')
+def handleDisconnection():
+    for i in authenticated_connections:
+        if authenticated_connections[i] == request.sid:
+            del authenticated_connections[i]
+    for i in guest_connections:
+        if guest_connections[i] == request.sid:
+            del guest_connections[i]
 
 #This is the endpoint for when a post is made
-#To send a message to ALL websocket connections, do emit(*message data stuff here*,broadcast=True)
+#To send a message to ALL websocket connections, do emit('event flag',*message data stuff here*,broadcast=True)
 @socketio.on('message')
 def handleWebsocket(data):
     print(data)
@@ -243,7 +255,7 @@ def handleWebsocket(data):
         if authenticated_connections[i] == request.sid:
             username = i
     if username == None: #Don't allow post
-        print("") #TODO: Figure out response
+        emit('unauthenticated', room=request.sid)
     else: #Assume user
         #Load the data
         data = json.loads(data)
@@ -251,17 +263,28 @@ def handleWebsocket(data):
             #Save the file
             file_name = saveFile(username, data) #this saves the file and returns a file name to be used to request on client side
             #Store the text data in db and get response object
-            response = handlePost(username, data["title"], data["description"], data["answer"])
+            response = handlePost(username, data["title"], data["description"], data["answer"], file_name)
             response["file_name"] = file_name
             response = json.dumps(response)
-            emit(response, broadcast=True)
+            emit('message',response, broadcast=True)
         elif data.get("file") == "null":  # No image upload with the text
             #Store the text data in db and get response object
-            response = handlePost(username, data["title"], data["description"], data["answer"])
-            response["file_name"] = "None"
+            response = handlePost(username, data["title"], data["description"], data["answer"], None)
             response = json.dumps(response)
-            emit(response, broadcast=True)
+            emit('message', response, broadcast=True)
 
+#Endpoint for when a user answers a question
+@socketio.on('answering')
+def answeringWebsocket(data):
+    username = None
+    for i in authenticated_connections:
+        if authenticated_connections[i] == request.sid:
+            username = i
+    if username == None: #Don't allow post
+        emit('unauthenticated', room=request.sid)
+    else: #Run actual code below here
+        data = json.loads(data)
+        return
 
 
 if __name__ == '__main__':

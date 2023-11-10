@@ -7,15 +7,20 @@ function initWS() {
 
     // Called whenever data is received from the server over the WebSocket connection
     socket.on('message', (ws_message) => {
-        const message = JSON.parse(ws_message.data);
-        const messageType = message.messageType
-        if(messageType === 'chatMessage'){
-            addMessageToChat(message);
-        }else{
-            // send message to WebRTC
-            processMessageAsWebRTC(message, messageType);
-        }
+        let message = JSON.parse(ws_message);
+        addPosts(message);
     });
+
+    socket.on('unauthenticated', () => {
+        alert("You are unauthenticated, you cannot post or answer questions")
+    });
+
+    //Template for receiving websocket data from client
+    /*
+    socket.on('answering', (ws_message) => {
+        let message = JSON.parse(ws_message);
+    });
+     */
 }
 function logOut() {
     let username = ""
@@ -50,6 +55,38 @@ function likePost(username, id) {
 }
 
 function postHTML(postJSON) {
+    console.log("parsing received message")
+    console.log(postJSON)
+    const username = postJSON.username;
+    const title = postJSON["title"];
+    const description = postJSON["description"];
+    let question_id = "question" + postJSON["postID"];
+    let image_name = postJSON["file_name"]
+    let question_button = question_id + "button"
+    let question_box = question_id + "box"
+
+    console.log(username)
+    console.log(title)
+    console.log(description)
+    console.log(image_name)
+
+    let html_string = ""
+    let beginning_html = "<div id=" + question_id + ">"
+    let username_html = "<span><b>Username: </b>" + username + "<br>" ;
+    let title_html = "<b>Title: </b>" + title + "<br><br>";
+    html_string += beginning_html + username_html + title_html
+    if (image_name !== undefined && image_name !== null) {
+        let image_string = "<img src='public/image/" + image_name + "'><br>"
+        html_string += image_string
+    }
+    let description_html = "<b>Description: </b>" + description + "<br>";
+    let submit_box_html = "<input id='" + question_box + "' type='text'>"
+    let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button>"
+    let ending_html = "</span></div><br><br>"
+    html_string += description_html + submit_box_html + submit_html + ending_html;
+    return html_string
+
+    /*
     const username = postJSON.username;
     const title = postJSON["title"];
     const description = postJSON["description"];
@@ -71,6 +108,7 @@ function postHTML(postJSON) {
     postHTML += "<span><b>" + username + "</b>: - " + title + "<br><br>" + description + "<br><br><br> likes: " + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\" onclick=\"likePost('" + username + "', " + id + ")\">Like <3</button><br><br><hr></span>";
     // postHTML += "<span><b>" + username + "</b>: - "+ title + "<br><br>" + description + "<br><br><br>" + likes + "<br><button id=\"post-button\" value=\"" + like_OR_dislike + "\"onclick=\"likePost(" + username + ", " + id + ")\">Like<br></button></span>";
     return postHTML;
+     */
 }
 
 function clearPost() {
@@ -81,7 +119,6 @@ function clearPost() {
 function addPosts(postJSON) {
     const posts = document.getElementById("posts");
     posts.innerHTML += postHTML(postJSON);
-
 }
 
 //This should be the only function modified to support websockets over ajax
@@ -91,7 +128,6 @@ function sendPost() {
     const postAnswerBox = document.getElementById("post-answer-key-box");
     let fileInput = document.getElementById("form-file");
     let file = fileInput.files[0];
-    console.log(file)
 
     if (file !== undefined){
         let reader = new FileReader();
@@ -116,7 +152,6 @@ function sendPost() {
         postDescriptionBox.value = "";
         postAnswerBox.value = "";
 
-        console.log("websocket");
         socket.emit('message', JSON.stringify(jsonObj));
         };
         reader.readAsArrayBuffer(file);
@@ -134,6 +169,15 @@ function sendPost() {
         postAnswerBox.value = "";
         document.getElementById("form-file").value = null;
     }
+}
+
+//Called when a user wants to submit their answer
+function submitAnswer(id){
+    let text_box_id = id.slice(0, -6)
+    text_box_id = text_box_id + "box"
+    let text_box_content = document.getElementById(text_box_id)
+    let jsonObj = {"answerID": id.slice(0, -6), "answerContent": text_box_content}
+    socket.emit('answering', JSON.stringify(jsonObj))
 }
 
 //With websockets, this is only called on page load to load existing question posts
