@@ -136,24 +136,22 @@ def saveFile(username, data):
 #Author: Aryan Kum / Sam Palutro / Gordon Tang
 def enteringAnswers(username, answerID, answerContent):
     #Retrieve the question post document
-    print(answerID)
-    print(int(answerID))
     question_doc = postDB.find_one({"postID": int(answerID)})
     if question_doc == None: #Trying to answer a question that doesn't exist
         return None
     if question_doc["username"] == username: #Trying to answer their own question
-        return 1
+        return "1"
     if question_doc["Answerable"] == 0: #Trying to answer when time limit is reached
-        return 2
+        return "2"
     elif question_doc != None: #Retrieve the dictionary of stored answers
         user_answers = question_doc["user_answers"]
-        print(user_answers)
         #Check if the user has already answered
-        if user_answers.get(username) == username: #User has already submitted an answer, cannot submit more than once
-            return 3
+        if username in user_answers: #User has already submitted an answer, cannot submit more than once
+            return "3"
         else: #Submit the answer into db
             user_answers[username] = answerContent #Update the dictionary we retrieved
             postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
+            return True
 
 #Finds the doc and updates the time for it
 def getTimeRemaining(id):

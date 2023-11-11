@@ -253,7 +253,6 @@ def handleDisconnection():
 #To send a message to ALL websocket connections, do emit('event flag',*message data stuff here*,broadcast=True)
 @socketio.on('message')
 def handleWebsocket(data):
-    print(data)
     #Find the username of the current connection
     username = None
     for i in authenticated_connections:
@@ -311,7 +310,6 @@ def handleWebsocket(data):
 #To be clear:
 @socketio.on('answering')
 def answeringWebsocket(data):
-    print(data)
     username = None
     for i in authenticated_connections:
         if authenticated_connections[i] == request.sid:
@@ -323,12 +321,13 @@ def answeringWebsocket(data):
         result = enteringAnswers(username, data["answerID"], str(data["answerContent"]).lower())     #Enters the answer in the database
         if result == None: #User is trying to submit answer for a question that doesn't exist
             emit('nonexist', room=request.sid)
-        if result == 1: #User is trying to answer their own question
+        elif result == "1": #User is trying to answer their own question
             emit('own', room=request.sid)
-        if result == 2: #User is trying to submit after time limit
+        elif result == "2": #User is trying to submit after time limit
             emit('limit', room=request.sid)
-        if result == 3: #User is trying to submit more than once
+        elif result == "3": #User is trying to submit more than once
             emit('repeat', room=request.sid)
+
 
 #Called when the page is loaded by timers for questions are already going down
 @socketio.on('timer_history')
