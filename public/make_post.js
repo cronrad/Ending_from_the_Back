@@ -21,7 +21,7 @@ function initWS() {
     });
 
     socket.on('repeat', () => {
-        alert("You cannot submit an answer more than once")
+        alert("You cannot submit an answer more than once or you are trying to answer your own question")
     });
 
     /*

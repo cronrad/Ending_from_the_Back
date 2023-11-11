@@ -131,7 +131,7 @@ def saveFile(username, data):
 
 
 #Function will enter the data we received into database
-#Returns None if the question id doesn't exist, False if the user has already submitted, True if successful
+#Returns None if the question id doesn't exist, False if the user has already submitted or they create it, True if successful
 #Author: Aryan Kum / Sam Palutro / Gordon Tang
 def enteringAnswers(username, answerID, answerContent):
     for post in postDB.find_one({}):
@@ -141,6 +141,8 @@ def enteringAnswers(username, answerID, answerContent):
             question_doc = postDB.find_one({"postID": int(answerID)})
             if question_doc == None: #Trying to answer a question that doesn't exist
                 return None
+            if question_doc["username"] == username:
+                return False
             elif question_doc != None: #Retrieve the dictionary of stored answers
                 user_answers = question_doc["user_answers"]
                 #Check if the user has already answered
