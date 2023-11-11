@@ -132,11 +132,38 @@ def saveFile(username, data):
 
 
 #Function will enter the data we received into database
-#Author: Aryan Kum / Sam Palutro
-def enteringAnswers(a_user, q_user, a_ID, q_ID, answerContent):
-    #a_user: the user answering the question
-    #q_user: the user who asked the question
-    answDB.insert_one({"a_user": a_user, "q_user": q_user, "a_id": a_ID, "q_id": q_ID, "answer": answerContent.lower()})
+#Returns None if the question id doesn't exist, False if the user has already submitted or they create it, True if successful
+#Author: Aryan Kum / Sam Palutro / Gordon Tang
+def enteringAnswers(username, answerID, answerContent):
+    #Retrieve the question post document
+    question_doc = postDB.find_one({"postID": int(answerID)})
+    if question_doc == None: #Trying to answer a question that doesn't exist
+        return None
+    if question_doc["username"] == username: #Trying to answer their own question
+        return "1"
+    if question_doc["Answerable"] == 0: #Trying to answer when time limit is reached
+        return "2"
+    elif question_doc != None: #Retrieve the dictionary of stored answers
+        user_answers = question_doc["user_answers"]
+        #Check if the user has already answered
+        if username in user_answers: #User has already submitted an answer, cannot submit more than once
+            return "3"
+        else: #Submit the answer into db
+            user_answers[username] = HTMLescaper(answerContent) #Update the dictionary we retrieved
+            postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
+            return True
+
+#Finds the doc and updates the time for it
+def getTimeRemaining(id):
+    question_doc = postDB.find_one({"postID": id})
+    remaining = question_doc["Answerable"]
+    return remaining
+
+def updateTimeRemaining(id, seconds):
+    postDB.update_one({"postID": id}, {"$set": {"Answerable": seconds}})
+
+def resetTimers():
+    postDB.update_many({}, {"$set": {"Answerable": 0}})
 
 #TODO: Function will grade and store for question
 #Author: Sam Palutro
