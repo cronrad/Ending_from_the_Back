@@ -16,27 +16,34 @@ function initWS() {
         alert("You are unauthenticated, you cannot post or answer questions")
     });
 
-    socket.on('timer', (tim) => {                                                             //Time listner to constantly refresh time and once time is 0 automatically submits
-        console.log(postList)                                                                 //the answers
+    socket.on('nonexist', () => {
+        alert("You are trying to submit an answer to a question that doesn't exist")
+    });
+
+    socket.on('repeat', () => {
+        alert("You cannot submit an answer more than once")
+    });
+
+    /*
+    socket.on('timer', (tim) => {                                                             //Time listner to constantly refresh time and once time is 0 automatically submits         //the answers
         if(tim.time == 0){                                                                    //TODO: THIS SOCKET LISTENER IS WHAT WE HAVE TO FIX TO GET RID OF DUPLICATE DATA
             document.getElementById("timer").innerHTML = "Time left to answer the question: 0";
             for(const x of postList){
                 socket.emit("answering", JSON.stringify({"answerID": x, "answerContent": document.getElementById("question"+x+"box").value}));     //This sends some duplicate data 
             }                                                                                                                                      //that I will handle on server side
-                                                                // ^ Above is supposed to use submitAnswer(id) but I am not sure how to get "id"
+            postList = []// ^ Above is supposed to use submitAnswer(id) but I am not sure how to get "id"
         }
         else{
             document.getElementById("timer").innerHTML = "Time left to answer the question: "+tim.time;        //This displays time left for questions to be answered in
         }
 
     });
+     */
      
-    //Template for receiving websocket data from client
-    /*
+    //This will respond with the time
     socket.on('answering', (ws_message) => {
         let message = JSON.parse(ws_message);
     });
-     */
 }
 
 
@@ -134,6 +141,8 @@ function addPosts(postJSON) {
     console.log(postHTML(postJSON));
     let regex = /id='question(\d+)box'/;
     let match = html.match(regex);
+    console.log("match")
+    console.log(match)
     postList.push(match[1]);
 }
 

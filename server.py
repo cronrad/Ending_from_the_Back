@@ -278,6 +278,7 @@ def handleWebsocket(data):
             emit('message', response, broadcast=True)
 
 #Endpoint for when a user answers a question
+#To be clear:
 @socketio.on('answering')
 def answeringWebsocket(data):
     username = None
@@ -288,11 +289,18 @@ def answeringWebsocket(data):
         emit('unauthenticated', room=request.sid) #room=request.sid to specify only this connection
     else: #Run actual code for objective 2 below here
         data = json.loads(data)
-        enteringAnswers(username, data["answerID"], str(data["answerContent"]).lower())                  #Enters the answer in the database
-        gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower())                    #Grades the answers and puts the results in the database
-        print(data)                                                                 #TODO: Data is bad rn since we are getting too many duplicates look in make_post.js to fix
-        socketio.sleep(5)                                                          #This is REQUIRED or the data we are getting is being printed in random order    
-        return
+        print(data)
+        result = enteringAnswers(username, data["answerID"], str(data["answerContent"]).lower())     #Enters the answer in the database
+        if result == None: #User is trying to submit answer for a question that doesn't exist
+            emit('nonexist', room=request.sid)
+        if result == False: #User is trying to submit more than once
+            emit('repeat', room=request.sid)
+        else:
+            return
+            #What we have to do here is keep track of time
+            #gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower()       #Grades the answers and puts the results in the database, we should prob do this when the timer ends
+            #socketio.sleep(5)
+
 
 #Sending live time for each question
 @socketio.on('timer')                                                               #Timer endpoint            #TODO: Gotta make it so that timer doesnt refresh on page refresh
