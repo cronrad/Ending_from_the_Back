@@ -2,6 +2,7 @@ import secrets
 import bcrypt
 import os
 from pymongo import MongoClient
+import time
 
 mongoClient = MongoClient("localhost") #For testing only
 #mongoClient = MongoClient("mongo")
@@ -91,7 +92,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "user_answers": {}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -134,23 +135,29 @@ def saveFile(username, data):
 #Returns None if the question id doesn't exist, False if the user has already submitted or they create it, True if successful
 #Author: Aryan Kum / Sam Palutro / Gordon Tang
 def enteringAnswers(username, answerID, answerContent):
-    for post in postDB.find_one({}):
-        if "postIDCounter" in post: #ignores post id counter in db
-            continue
-        else: #Find the answer id in db
-            question_doc = postDB.find_one({"postID": int(answerID)})
-            if question_doc == None: #Trying to answer a question that doesn't exist
-                return None
-            if question_doc["username"] == username:
-                return False
-            elif question_doc != None: #Retrieve the dictionary of stored answers
-                user_answers = question_doc["user_answers"]
-                #Check if the user has already answered
-                if user_answers.has_key(username) == True: #User has already submitted an answer, cannot submit more than once
-                    return False
-                else: #Submit the answer into db
-                    user_answers[username] = answerContent #Update the dictionary we retrieved
-                    postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
+    question_doc = postDB.find_one({"postID": int(answerID)})
+    if question_doc == None: #Trying to answer a question that doesn't exist
+        return None
+    if question_doc["username"] == username:
+        return False
+    elif question_doc != None: #Retrieve the dictionary of stored answers
+        user_answers = question_doc["user_answers"]
+        #Check if the user has already answered
+        if user_answers.has_key(username) == True: #User has already submitted an answer, cannot submit more than once
+            return False
+        else: #Submit the answer into db
+            user_answers[username] = answerContent #Update the dictionary we retrieved
+            postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
+
+#Finds the doc and updates the time for it
+def getTimeRemaining(id):
+    question_doc = postDB.find_one({"postID": id})
+    remaining = question_doc["Answerable"]
+    return remaining
+
+def updateTimeRemaining(id, seconds):
+    postDB.update_one({"postID": id}, {"$set": {"Answerable": seconds}})
+
 
 #TODO: Function will grade and store for question
 #Author: Sam Palutro

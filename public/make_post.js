@@ -24,6 +24,10 @@ function initWS() {
         alert("You cannot submit an answer more than once or you are trying to answer your own question")
     });
 
+    socket.on('timer', (ws_message) => {
+        updateTimer(JSON.parse(ws_message));
+    });
+
     /*
     socket.on('timer', (tim) => {                                                             //Time listner to constantly refresh time and once time is 0 automatically submits         //the answers
         if(tim.time == 0){                                                                    //TODO: THIS SOCKET LISTENER IS WHAT WE HAVE TO FIX TO GET RID OF DUPLICATE DATA
@@ -45,7 +49,12 @@ function initWS() {
         let message = JSON.parse(ws_message);
     });
 }
-
+function updateTimer(data) {
+    let elementID = data["timer_id"]
+    let remaining_time = data["remaining"]
+    let timer_element = document.getElementById(elementID)
+    timer_element.innerHTML = remaining_time
+}
 
 function logOut() {
     let username = "";
@@ -87,6 +96,7 @@ function postHTML(postJSON) {
     let image_name = postJSON["file_name"];
     let question_button = question_id + "button";
     let question_box = question_id + "box";
+    let question_timer = question_id + "time";
 
     let html_string = "";
     let beginning_html = "<div id=" + question_id + ">";
@@ -98,10 +108,12 @@ function postHTML(postJSON) {
         html_string += image_string;
     }
     let description_html = "<b>Description: </b>" + description + "<br>";
+    let timer_html = "<p>Time Remaining: </p>"
+    let timer_content_html = "<p id='" + question_timer + "'></p>"
     let submit_box_html = "<input id='" + question_box + "' type='text'>";
-    let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button>";
+    let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button><br>";
     let ending_html = "</span></div><br><br>";
-    html_string += description_html + submit_box_html + submit_html + ending_html;
+    html_string += description_html + timer_html + timer_content_html + submit_box_html + submit_html + ending_html;
     return html_string;
 
     /*

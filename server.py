@@ -9,7 +9,7 @@ from datetime import datetime
 import time
 
 app = Flask(__name__, static_folder='public')
-socketio = SocketIO(app, transports='websocket')
+socketio = SocketIO(app, transports='websocket', async_mode='threading')
 authenticated_connections = {}
 guest_connections = {}
 
@@ -269,13 +269,40 @@ def handleWebsocket(data):
             #Store the text data in db and get response object
             response = handlePost(username, data["title"], data["description"], data["answer"], file_name)
             response["file_name"] = file_name
-            response = json.dumps(response)
-            emit('message',response, broadcast=True)
+            response_json = json.dumps(response)
+            emit('message',response_json, broadcast=True)
+            #Handle the time
+            seconds = getTimeRemaining(response["postID"])
+            remaining = seconds
+            while remaining > 0:
+                if remaining <= 0:
+                    break
+                time.sleep(1)
+                remaining -= 1
+                # Update db and emit
+                updateTimeRemaining(response["postID"], remaining)
+                jsonObj = {"timer_id": ("question" + str(response["postID"]) + "timer"), "remaining": remaining}
+                print(jsonObj)
+                emit('timer', json.dumps(jsonObj), room=request.sid)
+            # Call grade function
         elif data.get("file") == "null":  # No image upload with the text
             #Store the text data in db and get response object
             response = handlePost(username, data["title"], data["description"], data["answer"], None)
-            response = json.dumps(response)
-            emit('message', response, broadcast=True)
+            response_json = json.dumps(response)
+            emit('message', response_json, broadcast=True)
+            seconds = getTimeRemaining(response["postID"])
+            remaining = seconds
+            while remaining > 0:
+                if remaining <= 0:
+                    break
+                time.sleep(1)
+                remaining -= 1
+                # Update db and emit
+                updateTimeRemaining(response["postID"], remaining)
+                jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
+                print(jsonObj)
+                emit('timer', json.dumps(jsonObj), room=request.sid)
+            #Call grade function
 
 #Endpoint for when a user answers a question
 #To be clear:
@@ -295,11 +322,9 @@ def answeringWebsocket(data):
             emit('nonexist', room=request.sid)
         if result == False: #User is trying to submit more than once
             emit('repeat', room=request.sid)
-        else:
-            return
-            #What we have to do here is keep track of time
-            #gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower()       #Grades the answers and puts the results in the database, we should prob do this when the timer ends
-            #socketio.sleep(5)
+
+        #Call gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower() #Grades the answers and puts the results in the database
+        #socketio.sleep(5)
 
 
 #Sending live time for each question
