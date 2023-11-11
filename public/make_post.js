@@ -18,12 +18,12 @@ function initWS() {
 
     socket.on('timer', (tim) => {                                                             //Time listner to constantly refresh time and once time is 0 automatically submits
         console.log(postList)                                                                 //the answers
-        if(tim.time == 0){
+        if(tim.time == 0){                                                                    //TODO: THIS SOCKET LISTENER IS WHAT WE HAVE TO FIX TO GET RID OF DUPLICATE DATA
             document.getElementById("timer").innerHTML = "Time left to answer the question: 0";
             for(const x of postList){
                 socket.emit("answering", JSON.stringify({"answerID": x, "answerContent": document.getElementById("question"+x+"box").value}));     //This sends some duplicate data 
             }                                                                                                                                      //that I will handle on server side
-            
+                                                                // ^ Above is supposed to use submitAnswer(id) but I am not sure how to get "id"
         }
         else{
             document.getElementById("timer").innerHTML = "Time left to answer the question: "+tim.time;        //This displays time left for questions to be answered in
@@ -208,6 +208,7 @@ function updatePost() {
                 document.getElementById('timer').innerHTML = "";
                 socket.emit('timer');
             }
+            
         }
     }
     request2.open("GET", "/posts");

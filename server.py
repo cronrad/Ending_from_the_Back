@@ -234,6 +234,8 @@ def initialConnection():
         guest_key = "Guest" + str(guest_connections["counter"])
         guest_connections["counter"] += 1
         guest_connections[guest_key] = request.sid
+    postDB.update_many({},{'$set': {'answerIDS': []}},upsert=False)
+    postDB.update_many({},{'$set': {'answerCon': []}},upsert=False)
 
 #This is when the the websocket connection disconnects
 #We remove them from either of our own maintained dictionary of connections
@@ -286,15 +288,16 @@ def answeringWebsocket(data):
         emit('unauthenticated', room=request.sid) #room=request.sid to specify only this connection
     else: #Run actual code for objective 2 below here
         data = json.loads(data)
-        print(data)
-        socketio.sleep(5)                                                          #This is REQUIRED or the data we are getting is being printed in random order
-        enteringAnswers(username, data["answerID"], data["answerContent"])         #TODO: Need to complete data processing, adding it to database and other database logic
+        enteringAnswers(username, data["answerID"], str(data["answerContent"]).lower())                  #Enters the answer in the database
+        gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower())                    #Grades the answers and puts the results in the database
+        print(data)                                                                 #TODO: Data is bad rn since we are getting too many duplicates look in make_post.js to fix
+        socketio.sleep(5)                                                          #This is REQUIRED or the data we are getting is being printed in random order    
         return
 
 #Sending live time for each question
-@socketio.on('timer')                                                               #Timer endpoint
-def sendingTime():
-    start = datetime.now()
+@socketio.on('timer')                                                               #Timer endpoint            #TODO: Gotta make it so that timer doesnt refresh on page refresh
+def sendingTime():                                                                                             # We can add the "start time" to database and subtract live time
+    start = datetime.now()                                                                                     # from it to get the actual time and it wont refresh on page reload
     while (datetime.now() - start).seconds <= 10:
         left = 10 - (datetime.now() - start).seconds
         emit('timer', {"time": left}, room=request.sid)

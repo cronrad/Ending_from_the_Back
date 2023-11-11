@@ -130,8 +130,29 @@ def saveFile(username, data):
     return file_name
 
 
-#TODO: Function will enter the data we received into database
+#Function will enter the data we received into database
+#Author: Aryan Kum / Sam Palutro
 def enteringAnswers(username, answerID, answerContent):
-    print(username)
-    print(answerContent)
-    print(answerID)
+    for post in postDB.find_one({}):
+        if "postIDCounter" in post: #ignores post id counter in db
+            continue
+        else:
+            if answerID in postDB.find_one({"username": username})["answerIDS"]:
+                continue
+            else:
+                postDB.update_one({"postID": int(answerID)}, {'$push': {'answerIDS': answerID}})
+                postDB.update_one({"postID": int(answerID)}, {'$push': {'answerCon': str(answerContent)}})
+
+#TODO: Function will grade and store for question
+#Author: Sam Palutro
+def gradeQuestion(username, answerID, answerContent):
+    for post in postDB.find({}):
+        if "postIDCounter" in post: #ignores post id counter in db
+            continue
+        else:
+            for ansID, ansCon in zip(post["answerIDS"], post["answerCon"]):
+                if str(ansCon).lower() == str(post["answer"]).lower():                                                                #TODO
+                    authDB.update_one({"username": post["username"]}, {"$set": {"score": {str(ansID): 1}}})                           #Not sure how I will make "score" an array of
+                else:                                                                                                                 #dicts since rn the score is just the score of
+                    authDB.update_one({"username": post["username"]}, {"$set": {"score": {str(ansID): 0}}})                           # the last question in database
+
