@@ -2,7 +2,6 @@ import secrets
 import bcrypt
 import os
 from pymongo import MongoClient
-import time
 
 mongoClient = MongoClient("localhost") #For testing only
 #mongoClient = MongoClient("mongo")
@@ -11,6 +10,8 @@ db = mongoClient["cse312_project"]
 authDB = db["auth"]
 postDB = db["post"]
 fileDB = db["file"]
+answDB = db["answ"]
+gradeDB = db["grade"]
 
 #HTML escaper function #TODO: Percent encoding?
 #Author: Gordon Tang
@@ -92,7 +93,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -105,7 +106,6 @@ def handlePost(username, title, description, answer, file_name):
 def setFileID(username, originalFileName):
     #Retrieve the user's doc
     #Create/Retrieve the latest file ID
-    originalFileName = originalFileName.replace("/", "")
     fileIDs = fileDB.find_one({"fileNameCounter": {"$exists": True}})
     if fileIDs == None:
         fileDB.insert_one({"fileIDCounter": 1})
@@ -118,8 +118,7 @@ def setFileID(username, originalFileName):
     fileDB.update_one({}, {"$inc": {"fileIDCounter": 1}})
     return fileName
 
-#Takes the file part of the dictionary and username and saves a file
-#Author: Gordon Tang
+
 def saveFile(username, data):
     file_dict = data["file"]
     # Get the actual data of the file
@@ -133,49 +132,41 @@ def saveFile(username, data):
 
 
 #Function will enter the data we received into database
-#Returns None if the question id doesn't exist, False if the user has already submitted or they create it, True if successful
-#Author: Aryan Kum / Sam Palutro / Gordon Tang
-def enteringAnswers(username, answerID, answerContent):
-    #Retrieve the question post document
-    question_doc = postDB.find_one({"postID": int(answerID)})
-    if question_doc == None: #Trying to answer a question that doesn't exist
-        return None
-    if question_doc["username"] == username: #Trying to answer their own question
-        return "1"
-    if question_doc["Answerable"] == 0: #Trying to answer when time limit is reached
-        return "2"
-    elif question_doc != None: #Retrieve the dictionary of stored answers
-        user_answers = question_doc["user_answers"]
-        #Check if the user has already answered
-        if username in user_answers: #User has already submitted an answer, cannot submit more than once
-            return "3"
-        else: #Submit the answer into db
-            user_answers[username] = HTMLescaper(answerContent) #Update the dictionary we retrieved
-            postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
-            return True
-
-#Finds the doc and updates the time for it
-def getTimeRemaining(id):
-    question_doc = postDB.find_one({"postID": id})
-    remaining = question_doc["Answerable"]
-    return remaining
-
-def updateTimeRemaining(id, seconds):
-    postDB.update_one({"postID": id}, {"$set": {"Answerable": seconds}})
-
-def resetTimers():
-    postDB.update_many({}, {"$set": {"Answerable": 0}})
+#Author: Aryan Kum / Sam Palutro
+def enteringAnswers(a_user, q_user, a_ID, q_ID, answerContent):
+    #a_user: the user answering the question
+    #q_user: the user who asked the question
+    answDB.insert_one({"a_user": a_user, "q_user": q_user, "a_id": a_ID, "q_id": q_ID, "answer": answerContent.lower()})
 
 #TODO: Function will grade and store for question
 #Author: Sam Palutro
-def gradeQuestion(username, answerID, answerContent):
-    for post in postDB.find({}):
-        if "postIDCounter" in post: #ignores post id counter in db
-            continue
-        else:
-            for ansID, ansCon in zip(post["answerIDS"], post["answerCon"]):
-                if str(ansCon).lower() == str(post["answer"]).lower():                                                                #TODO
-                    authDB.update_one({"username": post["username"]}, {"$set": {"score": {str(ansID): 1}}})                           #Not sure how I will make "score" an array of
-                else:                                                                                                                 #dicts since rn the score is just the score of
-                    authDB.update_one({"username": post["username"]}, {"$set": {"score": {str(ansID): 0}}})                           # the last question in database
+'''
+def gradeQuestion(q_id, answer):
+    answer = answer.lower()
+    q_query = {"q_id": q_id}
+    for i in answDB.find(q_query):
+        u_query = {"user": i["a_user"]}
+        if(i["answer"] == answer): #CORRECT ANSWER
+            if(gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
+                result = gradeDB.findone(u_query)
+                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"]+1, "corr": result["corr"]+1}})
+            else: #FIRST GRADE
+                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 1})
+        else: #WRONG ANSWER
+            if (gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
+                result = gradeDB.findone(u_query)
+                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"] + 1}})
+            else:#FIRST GRADE
+                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 0})
+'''
+#Function will grade and store grade for each user of a question
+#Author: Sam Palutro
+def gradeQuestion(q_id, answer):
+    answer = answer.lower()
+    q_query = {"q_id": q_id}
+    for i in answDB.find(q_query):
+        if(i["answer"] == answer): #CORRECT ANSWER
+            gradeDB.insert_one({"user": i["a_user"], "q_id": q_id, "answ": i["answer"], "corr": answer, "grade": 1})
+        else: #WRONG ANSWER
+            gradeDB.insert_one({"user": i["a_user"], "q_id": q_id, "answ": i["answer"], "corr": answer, "grade": 0})
 
