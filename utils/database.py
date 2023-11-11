@@ -93,7 +93,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -106,6 +106,7 @@ def handlePost(username, title, description, answer, file_name):
 def setFileID(username, originalFileName):
     #Retrieve the user's doc
     #Create/Retrieve the latest file ID
+    originalFileName = originalFileName.replace("/", "")
     fileIDs = fileDB.find_one({"fileNameCounter": {"$exists": True}})
     if fileIDs == None:
         fileDB.insert_one({"fileIDCounter": 1})
@@ -118,7 +119,8 @@ def setFileID(username, originalFileName):
     fileDB.update_one({}, {"$inc": {"fileIDCounter": 1}})
     return fileName
 
-
+#Takes the file part of the dictionary and username and saves a file
+#Author: Gordon Tang
 def saveFile(username, data):
     file_dict = data["file"]
     # Get the actual data of the file
