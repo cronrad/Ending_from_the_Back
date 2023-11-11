@@ -221,6 +221,13 @@ def username():
     )
     return response
 
+@app.route('/grades')
+def grades():
+    # check if user is logged in
+    # send them to page filled with user data for gradess
+    return render_template("grades.html")
+
+
 #This is where the http request for a 101 switching protocol occurs
 #We authenticate the user here and tie their websocket connection session to their username here
 @socketio.on('connect')
