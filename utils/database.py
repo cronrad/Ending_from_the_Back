@@ -135,10 +135,13 @@ def saveFile(username, data):
 #Returns None if the question id doesn't exist, False if the user has already submitted or they create it, True if successful
 #Author: Aryan Kum / Sam Palutro / Gordon Tang
 def enteringAnswers(username, answerID, answerContent):
+    #Retrieve the question post document
     question_doc = postDB.find_one({"postID": int(answerID)})
     if question_doc == None: #Trying to answer a question that doesn't exist
         return None
-    if question_doc["username"] == username:
+    if question_doc["username"] == username: #Trying to answer their own question
+        return False
+    if question_doc["Answerable"] == 0: #Trying to answer when time limit is reached
         return False
     elif question_doc != None: #Retrieve the dictionary of stored answers
         user_answers = question_doc["user_answers"]
@@ -158,6 +161,8 @@ def getTimeRemaining(id):
 def updateTimeRemaining(id, seconds):
     postDB.update_one({"postID": id}, {"$set": {"Answerable": seconds}})
 
+def resetTimers():
+    postDB.update_many({}, {"$set": {"Answerable": 0}})
 
 #TODO: Function will grade and store for question
 #Author: Sam Palutro

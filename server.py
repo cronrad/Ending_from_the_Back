@@ -12,6 +12,7 @@ app = Flask(__name__, static_folder='public')
 socketio = SocketIO(app, transports='websocket', async_mode='threading')
 authenticated_connections = {}
 guest_connections = {}
+resetTimers() #Sets all question timers to 0 so no frozen timers
 
 @app.after_request
 def addHeader(response): #Applies no sniff header
@@ -274,16 +275,17 @@ def handleWebsocket(data):
             #Handle the time
             seconds = getTimeRemaining(response["postID"])
             remaining = seconds
-            while remaining > 0:
+            while remaining >= 0:
                 if remaining <= 0:
+                    jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
+                    emit('timer', json.dumps(jsonObj), broadcast=True)
                     break
                 time.sleep(1)
                 remaining -= 1
                 # Update db and emit
                 updateTimeRemaining(response["postID"], remaining)
                 jsonObj = {"timer_id": ("question" + str(response["postID"]) + "timer"), "remaining": remaining}
-                print(jsonObj)
-                emit('timer', json.dumps(jsonObj), room=request.sid)
+                emit('timer', json.dumps(jsonObj), broadcast=True)
             # Call grade function
         elif data.get("file") == "null":  # No image upload with the text
             #Store the text data in db and get response object
@@ -292,16 +294,17 @@ def handleWebsocket(data):
             emit('message', response_json, broadcast=True)
             seconds = getTimeRemaining(response["postID"])
             remaining = seconds
-            while remaining > 0:
+            while remaining >= 0:
                 if remaining <= 0:
+                    jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
+                    emit('timer', json.dumps(jsonObj), broadcast=True)
                     break
                 time.sleep(1)
                 remaining -= 1
                 # Update db and emit
                 updateTimeRemaining(response["postID"], remaining)
                 jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
-                print(jsonObj)
-                emit('timer', json.dumps(jsonObj), room=request.sid)
+                emit('timer', json.dumps(jsonObj), broadcast=True)
             #Call grade function
 
 #Endpoint for when a user answers a question
@@ -327,14 +330,25 @@ def answeringWebsocket(data):
         #socketio.sleep(5)
 
 
-#Sending live time for each question
-@socketio.on('timer')                                                               #Timer endpoint            #TODO: Gotta make it so that timer doesnt refresh on page refresh
-def sendingTime():                                                                                             # We can add the "start time" to database and subtract live time
-    start = datetime.now()                                                                                     # from it to get the actual time and it wont refresh on page reload
-    while (datetime.now() - start).seconds <= 10:
-        left = 10 - (datetime.now() - start).seconds
-        emit('timer', {"time": left}, room=request.sid)
-        socketio.sleep(1)
+#Called when the page is loaded by timers for questions are already going down
+@socketio.on('timer_history')                                                               #Timer endpoint            #TODO: Gotta make it so that timer doesnt refresh on page refresh
+def sendingTime(data):                                                                                             # We can add the "start time" to database and subtract live time
+    data = json.loads(data)
+    id = int(data["id"])
+    seconds = getTimeRemaining(id)
+    remaining = seconds
+    while remaining >= 0:
+        if remaining <= 0:
+            jsonObj = {"timer_id": ("question" + str(id) + "time"), "remaining": remaining}
+            emit('timer', json.dumps(jsonObj), room=request.sid)
+            break
+        time.sleep(1)
+        remaining = getTimeRemaining(id)
+        # Update db and emit
+        jsonObj = {"timer_id": ("question" + str(id) + "time"), "remaining": remaining}
+        emit('timer', json.dumps(jsonObj), room=request.sid)
+
+
 
 
 if __name__ == '__main__':

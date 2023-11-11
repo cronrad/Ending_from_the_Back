@@ -53,6 +53,9 @@ function updateTimer(data) {
     let elementID = data["timer_id"]
     let remaining_time = data["remaining"]
     let timer_element = document.getElementById(elementID)
+    if (remaining_time === 0){
+        remaining_time = "Time Limit Reached"
+    }
     timer_element.innerHTML = remaining_time
 }
 
@@ -108,8 +111,8 @@ function postHTML(postJSON) {
         html_string += image_string;
     }
     let description_html = "<b>Description: </b>" + description + "<br>";
-    let timer_html = "<p>Time Remaining: </p>"
-    let timer_content_html = "<p id='" + question_timer + "'></p>"
+    let timer_html = "<b>Time Remaining: </b>"
+    let timer_content_html = "<b id='" + question_timer + "'></b><br>"
     let submit_box_html = "<input id='" + question_box + "' type='text'>";
     let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button><br>";
     let ending_html = "</span></div><br><br>";
@@ -150,12 +153,14 @@ function addPosts(postJSON) {
     const posts = document.getElementById("posts");
     posts.innerHTML += postHTML(postJSON);
     let html = postHTML(postJSON)
+    /*
     console.log(postHTML(postJSON));
     let regex = /id='question(\d+)box'/;
     let match = html.match(regex);
     console.log("match")
     console.log(match)
     postList.push(match[1]);
+     */
 }
 
 //This should be the only function modified to support websockets over ajax
@@ -224,12 +229,15 @@ function updatePost() {
         if (this.readyState === 4 && this.status === 200) {
             clearPost();
             const posts = JSON.parse(this.response);
+            let postIDs = []
             for (const post of posts) {
                 addPosts(post);
-                document.getElementById('timer').innerHTML = "";
-                socket.emit('timer');
+                postIDs.push(post["postID"])
             }
-            
+            for (const i of postIDs){
+                let jsonObj = {"id": i}
+                socket.emit("timer_history", JSON.stringify(jsonObj))
+            }
         }
     }
     request2.open("GET", "/posts");
@@ -258,13 +266,13 @@ function newPost() {
     }
     request.open("GET", "/username");
     request.send();
-    updatePost();
 
-    if (ws) {
-        initWS();
-    }
+    initWS();
+    updatePost();
+    /*
     else{ //This code shouldn't run part 3 and onwards
         setInterval(updatePost, 1000);
     }
+     */
 }
 
