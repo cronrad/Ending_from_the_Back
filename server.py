@@ -311,6 +311,7 @@ def handleWebsocket(data):
 #To be clear:
 @socketio.on('answering')
 def answeringWebsocket(data):
+    print(data)
     username = None
     for i in authenticated_connections:
         if authenticated_connections[i] == request.sid:
@@ -319,20 +320,19 @@ def answeringWebsocket(data):
         emit('unauthenticated', room=request.sid) #room=request.sid to specify only this connection
     else: #Run actual code for objective 2 below here
         data = json.loads(data)
-        print(data)
         result = enteringAnswers(username, data["answerID"], str(data["answerContent"]).lower())     #Enters the answer in the database
         if result == None: #User is trying to submit answer for a question that doesn't exist
             emit('nonexist', room=request.sid)
-        if result == False: #User is trying to submit more than once
+        if result == 1: #User is trying to answer their own question
+            emit('own', room=request.sid)
+        if result == 2: #User is trying to submit after time limit
+            emit('limit', room=request.sid)
+        if result == 3: #User is trying to submit more than once
             emit('repeat', room=request.sid)
 
-        #Call gradeQuestion(username, data["answerID"], str(data["answerContent"]).lower() #Grades the answers and puts the results in the database
-        #socketio.sleep(5)
-
-
 #Called when the page is loaded by timers for questions are already going down
-@socketio.on('timer_history')                                                               #Timer endpoint            #TODO: Gotta make it so that timer doesnt refresh on page refresh
-def sendingTime(data):                                                                                             # We can add the "start time" to database and subtract live time
+@socketio.on('timer_history')
+def sendingTime(data):
     data = json.loads(data)
     id = int(data["id"])
     seconds = getTimeRemaining(id)
@@ -347,8 +347,6 @@ def sendingTime(data):                                                          
         # Update db and emit
         jsonObj = {"timer_id": ("question" + str(id) + "time"), "remaining": remaining}
         emit('timer', json.dumps(jsonObj), room=request.sid)
-
-
 
 
 if __name__ == '__main__':

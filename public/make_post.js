@@ -20,8 +20,16 @@ function initWS() {
         alert("You are trying to submit an answer to a question that doesn't exist")
     });
 
+    socket.on('own', () => {
+        alert("You cannot answer your own question")
+    });
+
     socket.on('repeat', () => {
-        alert("You cannot submit an answer more than once or you are trying to answer your own question")
+        alert("You cannot submit an answer more than once")
+    });
+
+    socket.on('limit', () => {
+        alert("The time limit has been reached, you can longer answer this question")
     });
 
     socket.on('timer', (ws_message) => {
