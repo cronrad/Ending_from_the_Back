@@ -105,6 +105,7 @@ def handlePost(username, title, description, answer, file_name):
 def setFileID(username, originalFileName):
     #Retrieve the user's doc
     #Create/Retrieve the latest file ID
+    originalFileName = originalFileName.replace("/", "")
     fileIDs = fileDB.find_one({"fileNameCounter": {"$exists": True}})
     if fileIDs == None:
         fileDB.insert_one({"fileIDCounter": 1})
@@ -149,7 +150,7 @@ def enteringAnswers(username, answerID, answerContent):
         if username in user_answers: #User has already submitted an answer, cannot submit more than once
             return "3"
         else: #Submit the answer into db
-            user_answers[username] = answerContent #Update the dictionary we retrieved
+            user_answers[username] = HTMLescaper(answerContent) #Update the dictionary we retrieved
             postDB.update_one({"postID": int(answerID)}, {"$set": {"user_answers": user_answers}}) #Update the entry in the db
             return True
 
