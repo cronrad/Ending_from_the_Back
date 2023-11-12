@@ -284,3 +284,20 @@ function newPost() {
      */
 }
 
+// Retrieves username for grades page
+function getUsername(){
+    let username = "";
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            username = JSON.parse(this.response);
+            if (username === false) {
+                username = "Guest";
+            }
+            document.getElementById("user").innerHTML += username;
+        }
+    }
+    request.open("GET", "/username");
+    request.send();
+}
+

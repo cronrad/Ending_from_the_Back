@@ -2,8 +2,9 @@
     <link rel="stylesheet" type="text/css" href="public/style.css">
     <meta charset="UTF-8">
 </head>
+<!-- <body onload="newPost();"> -->
 
-<body onload="newPost();">
+<body>
     <script src="public/make_post.js"></script>
     <script src="public/socket.io.js"></script>
     <p id="paragraph">
@@ -11,10 +12,10 @@
         </div>
     <p></p>
     <hr>
-    <div id="user">Username:</div><br>
-    <label id="questions-answered">Questions Answered: </label><br>
-    <label id="questions-correct">Questions Correct: </label><br>
-    <label id="calculated-grade">Calculated Grade: </label><br>
+    <div id="user"><b>Username: </b></div><br>
+    <label id="questions-answered"><b>Questions Answered: </b></label><br>
+    <label id="questions-correct"><b>Questions Correct: </b></label><br>
+    <label id="calculated-grade"><b>Calculated Grade: </b></label><br>
     <div class="title">
         <h3>Grades for answered questions</h3><hr>
     </div><br><br>
@@ -24,5 +25,8 @@
 
 
 
-
-</body></html>
+</body>
+<script>
+    getUsername();
+</script>
+</html>
