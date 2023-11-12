@@ -299,7 +299,7 @@ function getUsername(){
             if (username === false) {
                 username = "Guest";
             }
-            document.getElementById("user").innerHTML += username;
+            document.getElementById("user").innerHTML += "<center>" + username + "<center>";
         }
     }
     request.open("GET", "/username");
@@ -318,7 +318,10 @@ function gradedPostHTML(postJSON) {
     const username = postJSON.username;
     const title = postJSON["title"];
     const description = postJSON["description"];
+    const expectedAnswer = postJSON.answer;
+    const userAnswers = postJSON.user_answers;
     const grade = postJSON.grade; 
+    const real_username = postJSON.real_username;
 
     let question_id = "question" + postJSON["postID"];
     let image_name = postJSON["file_name"];
@@ -335,12 +338,27 @@ function gradedPostHTML(postJSON) {
     }
 
     let description_html = "<b>Description: </b>" + description + "<br>";
-    let grade_html = "<b>Grade: </b>" + grade + "<br>"; 
-    let ending_html = "</span></div><br><br>";
-    html_string += description_html + grade_html + ending_html;
+    let expectedAnswer_html = "<b>Expected Answer: </b></b><span style='color: blue;'>" + expectedAnswer + "</span><br>";
+    let userAnswer_html = "<b>Your Answer: </b><span style='color: blue;'>"+userAnswers[real_username]+"</span></b><br>";
+    // if (userAnswers && userAnswers[username]) {
+    //     userAnswer_html += userAnswers[username] + "<br>";
+    // } else {
+    //     userAnswer_html += "No answer recorded<br>";
+    // }
+
+    let grade_html = "<b>Your Grade: </b>";
+    if (grade === "Correct") {
+        grade_html += "<span style='color: green;'>" + grade + "</span><br>";
+    } else {
+        grade_html += "<span style='color: red;'>" + grade + "</span><br>";
+    }
+
+    let ending_html = "</span></div><br><br><hr>";
+    html_string += description_html + expectedAnswer_html + userAnswer_html + grade_html + ending_html;
     
     return html_string;
 }
+
 
 function updateGradedPost() {
     let request3 = new XMLHttpRequest();
@@ -360,5 +378,102 @@ function updateGradedPost() {
 function clearGradedPost() {
     const posts = document.getElementById("answered-questions");
     posts.innerHTML = "";
+
 }
 
+// For question gradebook
+
+function addQuestionGradebook(postJSON) {
+    const posts = document.getElementById("question-gradebook");
+    posts.innerHTML += questionGradebookPostHTML(postJSON);
+    let html = questionGradebookPostHTML(postJSON)
+}
+
+function questionGradebookPostHTML(postJSON) {
+    const username = postJSON.username;
+    const title = postJSON["title"];
+    const description = postJSON["description"];
+    const grades = postJSON.question_grades;
+    const expectedAnswer = postJSON.answer;  // Assuming the answer is stored in the "answer" property
+    const userAnswers = postJSON.user_answers;  // Assuming user answers are stored in the "user_answers" property
+
+    let question_id = "question" + postJSON["postID"];
+    let image_name = postJSON["file_name"];
+
+    let html_string = "";
+    let beginning_html = "<div id=" + question_id + ">";
+    let username_html = "<span><b>Username: </b>" + username + "<br>";
+    let title_html = "<b>Title: </b>" + title + "<br><br>";
+    html_string += beginning_html + username_html + title_html;
+
+    if (image_name !== undefined && image_name !== null) {
+        let image_string = "<img src='public/image/" + image_name + "'><br>";
+        html_string += image_string;
+    }
+
+    let description_html = "<b>Description: </b>" + description + "<br>";
+    html_string += description_html;
+
+    // Display expected answer in blue
+    html_string += "<b>Expected Answer: </b><span style='color: blue;'>" + expectedAnswer + "</span><br>";
+
+    // Check if there are no answers
+    if (!grades || Object.keys(grades).length === 0) {
+        // Display "No Answers :(" in rainbow colors
+        html_string += "<b>User's Answers and Grades: </b><span style='color: red;'>No Answers :(</span><br>";
+    } else {
+        // Iterate over the grades dictionary
+        html_string += "<b>User Answers and Grades:</b><br>";
+        for (const user in grades) {
+            if (grades.hasOwnProperty(user)) {
+                let grade_html = "&emsp;<b>" + user + ":</b><br>";
+
+                // Display user's answer in blue
+                if (userAnswers && userAnswers[user]) {
+                    grade_html += "&emsp;&emsp;User's Answer: <span style='color: blue;'>" + userAnswers[user] + "</span><br>";
+                } else {
+                    grade_html += "&emsp;&emsp;User's Answer: <span style='color: blue;'>Not provided</span><br>";
+                }
+
+                // Check if the grade is "Correct" or "Incorrect"
+                grade_html += "&emsp;&emsp;Grade: ";
+                if (grades[user] === "Correct") {
+                    grade_html += "<span style='color: green;'>" + grades[user] + "</span><br>";
+                } else {
+                    grade_html += "<span style='color: red;'>" + grades[user] + "</span><br>";
+                }
+
+                html_string += grade_html;
+            }
+        }
+    }
+
+    let ending_html = "</span></div><br><br><hr>";
+    html_string += ending_html;
+
+    return html_string;
+}
+
+
+
+
+
+function updateQuestionGradebook() {
+    let request3 = new XMLHttpRequest();
+    request3.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            clearQuestionGradebook();
+            const posts = JSON.parse(this.response);
+            for (const post of posts) {
+                addQuestionGradebook(post);
+            }
+        }
+    }
+    request3.open("GET", "/question_gradebook");
+    request3.send();
+}
+
+function clearQuestionGradebook() {
+    const posts = document.getElementById("question-gradebook");
+    posts.innerHTML = "";
+}

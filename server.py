@@ -226,25 +226,16 @@ def grades():
 
 @app.route('/grading')
 def grading():
-    #This keeps track of all the posts and updates
-    post_list = []
-    auth_token = request.cookies.get("auth_token")
-    token_check, username = authenticate("", "", auth_token, False)
+    # gradebook for a user
+    response = user_grades(request, app)
+    return response 
 
-    for post in postDB.find():
-        if "postIDCounter" in post: #ignores post id counter in db
-            continue
-        elif username in post["user_answers"]:
-            grade = calculateGrade(username, post)
-            post["grade"] = grade
-            post_list.append(post)
-    response = app.response_class(
-        response=str(json_util.dumps(post_list)),
-        status=200,
-        mimetype='application/json'
-    )
+@app.route('/question_gradebook')
+def question_gradebook():
+    # gradebook for a user's questions
+    response = question_grades(request, app)
     return response
-
+ 
 
 #This is where the http request for a 101 switching protocol occurs
 #We authenticate the user here and tie their websocket connection session to their username here
