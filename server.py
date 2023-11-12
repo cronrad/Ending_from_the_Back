@@ -242,8 +242,6 @@ def initialConnection():
         guest_key = "Guest" + str(guest_connections["counter"])
         guest_connections["counter"] += 1
         guest_connections[guest_key] = request.sid
-    postDB.update_many({},{'$set': {'answerIDS': []}},upsert=False)
-    postDB.update_many({},{'$set': {'answerCon': []}},upsert=False)
 
 #This is when the the websocket connection disconnects
 #We remove them from either of our own maintained dictionary of connections
@@ -312,6 +310,7 @@ def handleWebsocket(data):
                 jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
                 emit('timer', json.dumps(jsonObj), broadcast=True)
             #Call grade function
+            grading()
 
 #Endpoint for when a user answers a question
 #To be clear:
