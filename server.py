@@ -9,7 +9,7 @@ from datetime import datetime
 import time
 
 app = Flask(__name__, static_folder='public')
-socketio = SocketIO(app, transports='websocket', async_mode='threading')
+socketio = SocketIO(app, transports='websocket', async_mode='threading', max_http_buffer_size=8000000)
 authenticated_connections = {}
 guest_connections = {}
 resetTimers() #Sets all question timers to 0 so no frozen timers
@@ -32,8 +32,6 @@ def root():
             return render_template('login.html')
     else: #Not logged in, send login page
         return render_template('login.html')
-
-
 
 @app.route('/app')
 def guestView():
