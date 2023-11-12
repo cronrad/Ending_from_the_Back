@@ -200,7 +200,7 @@ function sendPost() {
             title: title,
             description: description,
             answer: answer,
-            file: fileData
+            file_name: fileData
         };
 
         postTitleBox.value = "";
@@ -216,7 +216,7 @@ function sendPost() {
         const title = postTitleBox.value;
         const description = postDescriptionBox.value;
         const answer = postAnswerBox.value;
-        let jsonObj = {"title": title, "description": description, "answer": answer, "file": "null"};
+        let jsonObj = {"title": title, "description": description, "answer": answer, "file_name": "null"};
         socket.emit('message', JSON.stringify(jsonObj));
         postTitleBox.value = "";
         postDescriptionBox.value = "";

@@ -3,8 +3,8 @@ import bcrypt
 import os
 from pymongo import MongoClient
 
-mongoClient = MongoClient("localhost") #For testing only
-#mongoClient = MongoClient("mongo")
+#mongoClient = MongoClient("localhost") #For testing only
+mongoClient = MongoClient("mongo")
 
 db = mongoClient["cse312_project"]
 authDB = db["auth"]
@@ -93,7 +93,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file_name": file_name, "Answerable": 60, "user_answers": {}})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -122,7 +122,7 @@ def setFileID(username, originalFileName):
 #Takes the file part of the dictionary and username and saves a file
 #Author: Gordon Tang
 def saveFile(username, data):
-    file_dict = data["file"]
+    file_dict = data["file_name"]
     # Get the actual data of the file
     file_content = bytearray(file_dict["content"])
     # Get the new file name

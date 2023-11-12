@@ -137,6 +137,7 @@ def posts():
             continue
         else:
             post_list.append(post)
+    print(post_list)
     response = app.response_class(
         response=str(json_util.dumps(post_list)),
         status=200,
@@ -292,7 +293,7 @@ def handleWebsocket(data):
     else: #Assume user
         #Load the data
         data = json.loads(data)
-        if data["file"] != "null":  # File upload along with the text
+        if data["file_name"] != "null":  # File upload along with the text
             #Save the file
             file_name = saveFile(username, data) #this saves the file and returns a file name to be used to request on client side
             #Store the text data in db and get response object
@@ -316,7 +317,7 @@ def handleWebsocket(data):
                 emit('timer', json.dumps(jsonObj), broadcast=True)
             # Call grade function
             grading()
-        elif data.get("file") == "null":  # No image upload with the text
+        elif data.get("file_name") == "null":  # No image upload with the text
             #Store the text data in db and get response object
             response = handlePost(username, data["title"], data["description"], data["answer"], None)
             response_json = json.dumps(response)
