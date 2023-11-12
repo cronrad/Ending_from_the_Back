@@ -93,7 +93,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 15, "user_answers": {}})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -167,27 +167,21 @@ def updateTimeRemaining(id, seconds):
 def resetTimers():
     postDB.update_many({}, {"$set": {"Answerable": 0}})
 
-#TODO: Function will grade and store for question
-#Author: Sam Palutro
-'''
-def gradeQuestion(q_id, answer):
-    answer = answer.lower()
-    q_query = {"q_id": q_id}
-    for i in answDB.find(q_query):
-        u_query = {"user": i["a_user"]}
-        if(i["answer"] == answer): #CORRECT ANSWER
-            if(gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
-                result = gradeDB.findone(u_query)
-                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"]+1, "corr": result["corr"]+1}})
-            else: #FIRST GRADE
-                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 1})
-        else: #WRONG ANSWER
-            if (gradeDB.count_documents({"user": i["a_user"]}, limit = 1)): #GRADES RECORDED
-                result = gradeDB.findone(u_query)
-                gradeDB.update_one(u_query, {"$set": {"answ": result["answ"] + 1}})
-            else:#FIRST GRADE
-                gradeDB.insert_one({"user": i["a_user"], "answ": 1, "corr": 0})
-'''
+#Grades and stores the grade for functions
+def grading():
+    for post in postDB.find({}):
+        if "postIDCounter" in post:
+            continue
+        else:
+            print(post)
+            user_scores = post.get("user_scores", {})
+            for key, val in post["user_answers"].items():
+                if str(post["answer"]).lower() == str(val).lower():
+                    user_scores[str(key)] = 1
+                else:
+                    user_scores[str(key)] = 0
+                postDB.update_one({"username": str(post["username"])}, {'$set': {'user_scores': user_scores}})
+
 #Function will grade and store grade for each user of a question
 #Author: Sam Palutro
 def gradeQuestion(q_id, answer):
