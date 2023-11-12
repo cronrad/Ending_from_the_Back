@@ -286,9 +286,10 @@ def handleWebsocket(data):
                 remaining -= 1
                 # Update db and emit
                 updateTimeRemaining(response["postID"], remaining)
-                jsonObj = {"timer_id": ("question" + str(response["postID"]) + "timer"), "remaining": remaining}
+                jsonObj = {"timer_id": ("question" + str(response["postID"]) + "time"), "remaining": remaining}
                 emit('timer', json.dumps(jsonObj), broadcast=True)
             # Call grade function
+            grading()
         elif data.get("file") == "null":  # No image upload with the text
             #Store the text data in db and get response object
             response = handlePost(username, data["title"], data["description"], data["answer"], None)

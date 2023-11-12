@@ -64,7 +64,12 @@ function updateTimer(data) {
     if (remaining_time === 0){
         remaining_time = "Time Limit Reached"
     }
-    timer_element.innerHTML = remaining_time
+    if (timer_element == null){
+    }
+    else{
+        timer_element.innerHTML = remaining_time
+    }
+
 }
 
 function logOut() {

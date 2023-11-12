@@ -93,7 +93,7 @@ def handlePost(username, title, description, answer, file_name):
         postDB.insert_one({"postIDCounter": 1})
     #Inserts the post data into the db
     postID = postDB.find_one({"postIDCounter": {"$exists": True}})
-    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 15, "user_answers": {}})
+    postDB.insert_one({"postID": postID["postIDCounter"], "username": username, "title": title, "description": description, "answer": answer, "file": file_name, "Answerable": 60, "user_answers": {}})
     #Create the response json
     response = {"postID": postID["postIDCounter"] ,"username": username, "title": title, "description": description}
     postDB.update_one({}, {"$inc": {"postIDCounter": 1}})
@@ -173,7 +173,6 @@ def grading():
         if "postIDCounter" in post:
             continue
         else:
-            print(post)
             user_scores = post.get("user_scores", {})
             for key, val in post["user_answers"].items():
                 if str(post["answer"]).lower() == str(val).lower():
