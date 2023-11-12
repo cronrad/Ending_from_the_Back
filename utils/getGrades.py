@@ -5,7 +5,7 @@ from utils.database import *
 def calculateGrade(username, post):
     userAnswer = post["user_answers"].get(username)
     # if userAnswer != None:
-    if post["answer"] == userAnswer:
+    if str(post["answer"]).lower() == str(userAnswer).lower():
         return "Correct"
     else:
         return "Incorrect"

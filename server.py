@@ -226,7 +226,7 @@ def grades():
     return render_template("grades.html")
 
 @app.route('/grading')
-def grading():
+def user_grading():
     # gradebook for a user
     response = user_grades(request, app)
     return response 

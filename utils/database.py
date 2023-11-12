@@ -173,13 +173,15 @@ def grading():
         if "postIDCounter" in post:
             continue
         else:
-            user_scores = post.get("user_scores", {})
+            user_scores = {}
             for key, val in post["user_answers"].items():
                 if str(post["answer"]).lower() == str(val).lower():
                     user_scores[str(key)] = 1
                 else:
                     user_scores[str(key)] = 0
-                postDB.update_one({"postID": post["postID"]}, {'$set': {'user_scores': user_scores}})
+
+            postDB.update_one({"postID": post["postID"]}, {'$set': {'user_scores': user_scores}})
+
 
 #Function will grade and store grade for each user of a question
 #Author: Sam Palutro
