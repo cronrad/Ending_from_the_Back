@@ -180,7 +180,7 @@ def grading():
                     user_scores[str(key)] = 1
                 else:
                     user_scores[str(key)] = 0
-                postDB.update_one({"username": str(post["username"])}, {'$set': {'user_scores': user_scores}})
+                postDB.update_one({"postID": post["postID"]}, {'$set': {'user_scores': user_scores}})
 
 #Function will grade and store grade for each user of a question
 #Author: Sam Palutro
