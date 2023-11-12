@@ -1,5 +1,6 @@
 from flask import *
 from utils.database import *
+from utils.getGrades import *
 import json
 import bson.json_util as json_util
 from flask_socketio import SocketIO, emit
@@ -221,9 +222,28 @@ def username():
 
 @app.route('/grades')
 def grades():
-    # check if user is logged in
-    # send them to page filled with user data for gradess
     return render_template("grades.html")
+
+@app.route('/grading')
+def grading():
+    #This keeps track of all the posts and updates
+    post_list = []
+    auth_token = request.cookies.get("auth_token")
+    token_check, username = authenticate("", "", auth_token, False)
+
+    for post in postDB.find():
+        if "postIDCounter" in post: #ignores post id counter in db
+            continue
+        elif username in post["user_answers"]:
+            grade = calculateGrade(username, post)
+            post["grade"] = grade
+            post_list.append(post)
+    response = app.response_class(
+        response=str(json_util.dumps(post_list)),
+        status=200,
+        mimetype='application/json'
+    )
+    return response
 
 
 #This is where the http request for a 101 switching protocol occurs
@@ -245,12 +265,27 @@ def initialConnection():
 #We remove them from either of our own maintained dictionary of connections
 @socketio.on('disconnect')
 def handleDisconnection():
+    to_delete = []
+
+    # Iterate over authenticated_connections
     for i in authenticated_connections:
         if authenticated_connections[i] == request.sid:
-            del authenticated_connections[i]
+            to_delete.append(i)
+
+    # Delete items outside the loop
+    for i in to_delete:
+        del authenticated_connections[i]
+
+    to_delete = []
+
+    # Iterate over guest_connections
     for i in guest_connections:
         if guest_connections[i] == request.sid:
-            del guest_connections[i]
+            to_delete.append(i)
+
+    # Delete items outside the loop
+    for i in to_delete:
+        del guest_connections[i]
 
 #This is the endpoint for when a post is made
 #To send a message to ALL websocket connections, do emit('event flag',*message data stuff here*,broadcast=True)

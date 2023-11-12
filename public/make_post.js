@@ -306,3 +306,59 @@ function getUsername(){
     request.send();
 }
 
+// For grading page
+
+function addGradedPosts(postJSON) {
+    const posts = document.getElementById("answered-questions");
+    posts.innerHTML += gradedPostHTML(postJSON);
+    let html = gradedPostHTML(postJSON)
+}
+
+function gradedPostHTML(postJSON) {
+    const username = postJSON.username;
+    const title = postJSON["title"];
+    const description = postJSON["description"];
+    const grade = postJSON.grade; 
+
+    let question_id = "question" + postJSON["postID"];
+    let image_name = postJSON["file_name"];
+
+    let html_string = "";
+    let beginning_html = "<div id=" + question_id + ">";
+    let username_html = "<span><b>Username: </b>" + username + "<br>";
+    let title_html = "<b>Title: </b>" + title + "<br><br>";
+    html_string += beginning_html + username_html + title_html;
+
+    if (image_name !== undefined && image_name !== null) {
+        let image_string = "<img src='public/image/" + image_name + "'><br>";
+        html_string += image_string;
+    }
+
+    let description_html = "<b>Description: </b>" + description + "<br>";
+    let grade_html = "<b>Grade: </b>" + grade + "<br>"; 
+    let ending_html = "</span></div><br><br>";
+    html_string += description_html + grade_html + ending_html;
+    
+    return html_string;
+}
+
+function updateGradedPost() {
+    let request3 = new XMLHttpRequest();
+    request3.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            clearGradedPost();
+            const posts = JSON.parse(this.response);
+            for (const post of posts) {
+                addGradedPosts(post);
+            }
+        }
+    }
+    request3.open("GET", "/grading");
+    request3.send();
+}
+
+function clearGradedPost() {
+    const posts = document.getElementById("answered-questions");
+    posts.innerHTML = "";
+}
+
