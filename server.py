@@ -297,7 +297,7 @@ def handleWebsocket(data):
             #Save the file
             file_name = saveFile(username, data) #this saves the file and returns a file name to be used to request on client side
             #Store the text data in db and get response object
-            response = handlePost(username, data["title"], data["description"], data["answer"], file_name)
+            response = handlePost(username, HTMLescaper(data["title"]), HTMLescaper(data["description"]), HTMLescaper(data["answer"]), file_name)
             response["file_name"] = file_name
             response_json = json.dumps(response)
             emit('message',response_json, broadcast=True)
@@ -319,7 +319,7 @@ def handleWebsocket(data):
             grading()
         elif data.get("file_name") == "null":  # No image upload with the text
             #Store the text data in db and get response object
-            response = handlePost(username, data["title"], data["description"], data["answer"], None)
+            response = handlePost(username, HTMLescaper(data["title"]), HTMLescaper(data["description"]), HTMLescaper(data["answer"]), None)
             response_json = json.dumps(response)
             emit('message', response_json, broadcast=True)
             seconds = getTimeRemaining(response["postID"])
