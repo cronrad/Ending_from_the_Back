@@ -4,7 +4,7 @@ let postList = [];
 
 function initWS() {
     // Establish a WebSocket connection with the server
-    socket = io.connect('ws://' + window.location.host, { transports: ["websocket"] });
+    socket = io.connect('wss://' + window.location.host, { transports: ["websocket"] });
 
     // Called whenever data is received from the server over the WebSocket connection
     socket.on('message', (ws_message) => {
