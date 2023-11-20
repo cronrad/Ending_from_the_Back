@@ -208,6 +208,7 @@ function sendPost() {
         postAnswerBox.value = "";
 
         socket.emit('message', JSON.stringify(jsonObj));
+
         };
         reader.readAsArrayBuffer(file);
         document.getElementById("form-file").value = null;
@@ -258,11 +259,6 @@ function updatePost() {
 }
 
 function newPost() {
-    document.addEventListener("keypress", function (event) {
-        if (event.code === "Enter") {
-            sendPost();
-        }
-    });
     document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>CSE312 Quiz App</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
@@ -453,9 +449,6 @@ function questionGradebookPostHTML(postJSON) {
 
     return html_string;
 }
-
-
-
 
 
 function updateQuestionGradebook() {

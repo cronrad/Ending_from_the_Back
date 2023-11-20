@@ -137,7 +137,6 @@ def posts():
             continue
         else:
             post_list.append(post)
-    print(post_list)
     response = app.response_class(
         response=str(json_util.dumps(post_list)),
         status=200,
