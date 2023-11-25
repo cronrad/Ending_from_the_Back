@@ -7,6 +7,7 @@ RUN pip install pymongo
 RUN pip install bcrypt
 RUN pip install flask
 RUN pip install Flask-SocketIO
+RUN pip install Flask-Cors
 
 EXPOSE 8080
 EXPOSE 27017
