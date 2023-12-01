@@ -1,11 +1,20 @@
 from flask import *
 from utils.getGrades import *
 import json
+from utils.credentials import EMAIL_USER, EMAIL_PASSWORD
 import bson.json_util as json_util
 from flask_socketio import SocketIO, emit
 import time
 
 app = Flask(__name__, static_folder='public')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = EMAIL_USER
+app.config['MAIL_PASSWORD'] = EMAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = '312endingfromtheback@gmail.com'
+mail = Mail(app)
 socketio = SocketIO(app, transports='websocket', async_mode='threading', cors_allowed_origins="https://cse312.duckdns.org", max_http_buffer_size=8000000)
 authenticated_connections = {}
 guest_connections = {}
@@ -52,8 +61,10 @@ def register():
         )
         return response
     elif result == True:
+        email = emailVerificationLink(username)                                                            #GENERATING THE EMAIL
+        mail.send(email)                                                                                   #SENDING THE EMAIL
         response = app.response_class(
-            response="Registration successful",
+            response="Registration successful. A verification email has been sent to you. Click the link in the email to verify your account.",
             status=200,
             mimetype='text/plain'
         )
@@ -247,6 +258,25 @@ def question_gradebook():
     # gradebook for a user's questions
     response = question_grades(request, app)
     return response
+
+@app.route('/verification/<verificationToken>')                              
+def verification(verificationToken):
+    verified = authDB.find_one({"verificationToken": verificationToken})
+    if verified == None:
+        response = app.response_class(
+        response="404 PAGE NOT FOUND",
+        status=404,
+        mimetype='text/plain'
+        )
+        return response
+    else:
+        authDB.update_one({"verificationToken": verificationToken},{"$set": {"verified": True}})
+        response = app.response_class(
+        response="Account has been verified. You can now go back to the main app page and login.",
+        status=200,
+        mimetype='text/plain'
+        )
+        return response
 
 
 # This is where the http request for a 101 switching protocol occurs

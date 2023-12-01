@@ -173,7 +173,7 @@ function addPosts(postJSON) {
     console.log("match")
     console.log(match)
     postList.push(match[1]);
-     */
+    */
 }
 
 //This should be the only function modified to support websockets over ajax

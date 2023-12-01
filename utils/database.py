@@ -2,9 +2,12 @@ import secrets
 import bcrypt
 import os
 from pymongo import MongoClient
+from flask_mail import Mail
+import string
+from flask_mail import Message
 
-#mongoClient = MongoClient("localhost") #For testing only
-mongoClient = MongoClient("mongo")
+mongoClient = MongoClient("localhost") #For testing only
+#mongoClient = MongoClient("mongo")
 
 db = mongoClient["cse312_project"]
 authDB = db["auth"]
@@ -194,3 +197,26 @@ def gradeQuestion(q_id, answer):
         else: #WRONG ANSWER
             gradeDB.insert_one({"user": i["a_user"], "q_id": q_id, "answ": i["answer"], "corr": answer, "grade": 0})
 
+
+def generateVerificationLink():                                                                 #GENERATE 120 ENTROPY UNIQUE VERIFICATION TOKEN
+    charaters = string.ascii_letters + string.digits
+    verification_code = ''.join(secrets.choice(charaters) for _ in range(120))
+    return verification_code
+
+
+def inputVerificationInDatabase(username):
+    unique_link = generateVerificationLink()                                                     #GENERATE THE UNIQUE VERIFICATION TOKEN
+    authDB.update_one({"username": username}, {"$set": {"verificationToken": unique_link}})      #INPUTS THE UNIQUE VERIFICATION TOKEN IN DATABASE FOR THE SPECIFIC USERNAME
+    authDB.update_one({"username": username}, {"$set": {"verified": False}})                     #FIELD TO DISPLAY IF USER IS VERIFIED
+    return unique_link
+
+
+def emailVerificationLink(username):                                                            #SEND THE VERIFICATION EMAIL
+    unique_token = inputVerificationInDatabase(username)
+    email = Message(
+        subject="EMAIL VERIFICATION LINK",
+        recipients=[username],
+        html="CLICK THIS VERIFICATION LINK TO VERIFY YOUR ACCOUNT: http://localhost:8080/verification/" + unique_token,
+        sender="312endingfromtheback@gmail.com"
+    )
+    return email
