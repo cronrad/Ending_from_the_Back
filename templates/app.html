@@ -2,43 +2,47 @@
 <html lang="en">
 
 <head>
+    <title>CSE312 Not Tophat</title>
     <link rel="stylesheet" type="text/css" href="public/style.css"/>
     <meta charset="UTF-8">
 </head>
 
+
 <body onload="newPost();">
-    <script src="public/make_post.js"></script>
-    <script src="public/socket.io.js"></script>
-    <p id="paragraph">
-        <div class="title">
-            <h3><center>Just fill out the details and press post</center></h3>
-        </div>
-    </p>
-    <div class="post-form">
-        <hr>
-        <div id="user">Username:
-        </div>
-        <label>
-        </label>
-        Question Title:
-        <input id="post-title-box" type="text"><br><br>
-        Question Description:
-        <input id="post-description-box" type="text"><br><br>
-        Correct Question Answer:
-        <input id="post-answer-key-box" type="text"><br><br>
-        <br/>
-        <label for="form-file">Upload picture for your question(Max 8 MB)</label>
-        <input id="form-file" type="file" name="upload">
-        <br/>
-        <button id="post-button" onclick="sendPost()">Post Question</button><br>
+    <div class="title">
+        <h1><center>CSE312 Not Tophat</center></h1>
+    </div>
+    <div class="user_info" style="">
+        <p id="user">Username:</p>
+        <button id="logout-button" onclick="logOut()">Logout</button>
         <form action="{{ url_for('grades') }}" method="get">
             <button type="submit">Check Grades</button><br>
         </form> <!-- Have to modify javascript so that it will also send a picture if it is selected -->
-        <button id="logout-button" onclick="logOut()">Logout</button><br><br><br><br>
     </div>
-    <div id="timer">
+
+    <hr>
+    <div class="post_area" style="">
+        <script src="public/make_post.js"></script>
+        <script src="public/socket.io.js"></script>
+        <p id="paragraph">
+        </p>
+
+        <div class="post-form">
+            Question Title:
+            <input id="post-title-box" type="text"><br><br>
+            Question Description:
+            <input id="post-description-box" type="text"><br><br>
+            Answer Key:
+            <input id="post-answer-key-box" type="text"><br><br>
+            <label for="form-file">Upload picture for your question(Max 8 MB)</label>
+            <input id="form-file" type="file" name="upload">
+            <br/>
+            <button id="post-button" onclick="sendPost()">Post Question</button><br>
+            <br>
+        </div>
     </div>
-    <div id="posts">
-    </div>
+    <hr>
+    <div id="timer"></div>
+    <div id="posts"></div>
 </body>
 </html>

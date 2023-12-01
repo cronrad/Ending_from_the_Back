@@ -82,6 +82,9 @@ function logOut() {
     }
     request.open("POST", "/logout");
     request.send(JSON.stringify(username));
+    setTimeout(function(){
+        window.location.href = '/';
+    }, 1000);
 }
 
 function likePost(username, id) {
@@ -114,10 +117,10 @@ function postHTML(postJSON) {
     let question_box = question_id + "box";
     let question_timer = question_id + "time";
 
-    let html_string = "";
+    let html_string = "<br>";
     let beginning_html = "<div id=" + question_id + ">";
-    let username_html = "<span><b>Username: </b>" + username + "<br>" ;
-    let title_html = "<b>Title: </b>" + title + "<br><br>";
+    let username_html = "<span><b>Poster: </b>" + username + "<br>" ;
+    let title_html = "<b>Question: </b>" + title + "<br><br>";
     html_string += beginning_html + username_html + title_html;
     if (image_name !== undefined && image_name !== null) {
         let image_string = "<img src='public/image/" + image_name + "'><br>";
@@ -128,9 +131,9 @@ function postHTML(postJSON) {
     let timer_content_html = "<b id='" + question_timer + "'></b><br>"
     let submit_box_html = "<input id='" + question_box + "' type='text'>";
     let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button><br>";
-    let ending_html = "</span></div><br><br>";
+    let ending_html = "</span></div><br><br><br>";
     html_string += description_html + timer_html + timer_content_html + submit_box_html + submit_html + ending_html;
-    return html_string;
+    return [question_id, html_string];
 
     /*
     const username = postJSON.username;
@@ -164,8 +167,17 @@ function clearPost() {
 
 function addPosts(postJSON) {
     const posts = document.getElementById("posts");
-    posts.innerHTML += postHTML(postJSON);
-    let html = postHTML(postJSON)
+    let [question_id, added_html] = postHTML(postJSON)
+    posts.innerHTML += added_html
+    let question_element = document.getElementById(question_id)
+    question_element.style.margin = 'auto';
+    question_element.style.display = 'flex';
+    question_element.style.alignItems = 'center';
+    question_element.style.justifyContent = 'center';
+    question_element.style.border = '1px solid black';
+    question_element.style.backgroundColor = '#404040';
+    question_element.style.borderRadius = '30px';
+    question_element.style.display = 'display: inline-block';
     /*
     console.log(postHTML(postJSON));
     let regex = /id='question(\d+)box'/;
@@ -259,7 +271,6 @@ function updatePost() {
 }
 
 function newPost() {
-    document.getElementById("paragraph").innerHTML += "<br/><h1><center><b>CSE312 Quiz App</b></center></h1>";
     document.getElementById("post-title-box").focus();
 
     let username = "";

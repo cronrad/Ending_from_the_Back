@@ -1,6 +1,7 @@
 from flask import *
 from utils.getGrades import *
 import json
+from utils.credentials import EMAIL_USER, EMAIL_PASSWORD
 import bson.json_util as json_util
 from flask_socketio import SocketIO, emit
 import time
@@ -41,49 +42,40 @@ def guestView():
 # For registration
 @app.route('/register', methods=['POST'])
 def register():
-    username = request.form.get("username_reg")
-    password = request.form.get("password_reg")
+    body = json.loads(request.get_data())
+    username = body.get("username")
+    password = body.get("password")
     result = registerDB(username, password)
     if result == False:
-        response = app.response_class(
-            response="Username is taken, try a different username",
-            status=200,
-            mimetype='text/plain'
-        )
-        return response
+        message = "Username already taken"
+        response = jsonify({"message": message})
+        return response, 200
     elif result == True:
-        response = app.response_class(
-            response="Registration successful",
-            status=200,
-            mimetype='text/plain'
-        )
-        return response
+        message = "Registration Successful, Login Below"
+        response = jsonify({"message": message})
+        return response, 200
 
 
 # If you're looking to check if a user is authenticated, check authenticate() in utils/database.py
 # This is for processing the login from the login.html page only
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form.get("username_login")
-    password = request.form.get("password_login")
+    body = json.loads(request.get_data())
+    username = body.get("username")
+    password = body.get("password")
     token, username = authenticate(username, password, None, True)
     if token == False:
-        response = app.response_class(
-            response="Incorrect username or password",
-            status=200,
-            mimetype='text/plain'
-        )
-        return response
+        message = "Incorrect username or password"
+        response = jsonify({"message": message, "status": "0"})
+        return response, 200
     elif token != False:  # Set cookie
-        response = app.response_class(
-            response="Login Successful! Welcome " + username,
-            status=200,
-            mimetype='text/plain'
-        )
+        message = "Login Successful, Welcome " + username
+        response = jsonify({"message": message, "status": "1"})
         response.set_cookie("auth_token", token, max_age=3600, httponly=True)
-        return response
+        return response, 200
 
 
+#No longer used, old ajax method
 @app.route('/new_post', methods=['POST'])
 def new_post():
     body = json.loads(request.get_data())
@@ -152,6 +144,8 @@ def posts():
 
 @app.route('/logout', methods=['POST'])
 def logout():
+    body = json.loads(request.get_data())
+    print(body)
     # This logs user out incase they want to logout or switch to a different account
     auth_token = request.cookies.get("auth_token")
     token_check, username = authenticate("", "", auth_token, False)

@@ -2,19 +2,22 @@
 <html lang="en">
 
 <head>
+    <title>CSE312 Not Tophat</title>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="public/login.css"/>
+    <script src="public/login.js"></script>
 </head>
 
 <div class="titlebar">
-    <h2>CSE312 Project App</h2>
+    <h1>CSE312 Not Tophat</h1>
 </div>
 
 <div class="authentication">
     <div>
-        Want to view as a guest? Navigate to cse312.duckdns.org/app
-        <div>
-            Register:
-            <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+        <div class="loginbox">
+            <div>
+                Register:
+                <br>
                 <label>Username:
                     <input id="reg-form-username" type="text" name="username_reg"/>
                 </label>
@@ -22,12 +25,12 @@
                 <label>Password:&nbsp;
                     <input id="reg-form-pass" type="password" name="password_reg">
                 </label>
-                <input type="submit" value="Register">
-            </form>
-        </div>
-        <div>
-            Login:
-            <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+                <br/>
+                <br/>
+                <button id="registerbutton" onclick="registerAccount()">Register</button>
+                <br/>
+                Login:
+                <br>
                 <label>Username:
                     <input id="login-form-username" type="text" name="username_login"/>
                 </label>
@@ -35,8 +38,14 @@
                 <label>Password:&nbsp;
                     <input id="login-form-pass" type="password" name="password_login">
                 </label>
-                <input type="submit" value="Login">
-            </form>
+                <br/>
+                <br>
+                <button id="loginbutton" onclick="loginAccount()">Login</button>
+                </form>
+                <br>
+                <br>
+                <button id="guest" onclick="guestView()">Guest View</button>
+            </div>
         </div>
     </div>
 </div>
