@@ -20,8 +20,6 @@ body {
     border-radius:30px;
 }
 
-
-
 #registerbutton {
     padding: 5px;
     position: relative;
@@ -47,4 +45,20 @@ body {
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+}
+
+#email-form {
+    margin-left: 40px;
+}
+
+#reg-form-username {
+    margin-left: 6px;
+}
+
+#reg-form-pass {
+    margin-left: 10px;
+}
+
+#login-form-username {
+    margin-left: 1px;
 }

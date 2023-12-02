@@ -2,6 +2,9 @@ import secrets
 import bcrypt
 import os
 from pymongo import MongoClient
+from flask_mail import Mail
+import string
+from flask_mail import Message
 
 mongoClient = MongoClient("localhost") #For testing only
 #mongoClient = MongoClient("mongo")
@@ -193,4 +196,47 @@ def gradeQuestion(q_id, answer):
             gradeDB.insert_one({"user": i["a_user"], "q_id": q_id, "answ": i["answer"], "corr": answer, "grade": 1})
         else: #WRONG ANSWER
             gradeDB.insert_one({"user": i["a_user"], "q_id": q_id, "answ": i["answer"], "corr": answer, "grade": 0})
+
+
+def generateVerificationLink():                                                                 #GENERATE 120 ENTROPY UNIQUE VERIFICATION TOKEN
+    charaters = string.ascii_letters + string.digits
+    verification_code = ''.join(secrets.choice(charaters) for _ in range(120))
+    return verification_code
+
+
+def inputVerificationInDatabase(username, email):
+    unique_link = generateVerificationLink()                                                     #GENERATE THE UNIQUE VERIFICATION TOKEN
+    authDB.update_one({"username": username}, {"$set": {"verificationToken": unique_link}})      #INPUTS THE UNIQUE VERIFICATION TOKEN IN DATABASE FOR THE SPECIFIC USERNAME
+    authDB.update_one({"username": username}, {"$set": {"verified": False}})                     #FIELD TO DISPLAY IF USER IS VERIFIED
+    authDB.update_one({"username": username}, {"$set": {"email": email}})
+    return unique_link
+
+
+def emailVerificationLink(username, email):                                                           #SEND THE VERIFICATION EMAIL
+    unique_token = inputVerificationInDatabase(username, email)
+    email = Message(
+        subject="Verify Your Email",
+        recipients=[email],
+        html="Verify your email for cse312.duckdns.org by visiting this link: https://cse312.duckdns.org:8080/verification/" + unique_token,
+        sender="312endingfromtheback@gmail.com"
+    )
+    return email
+
+def checkEmail(username, email):
+    if username != "":
+        userDoc = authDB.find_one({"username": username})
+        if userDoc == None: #Not verified email
+            return False
+        elif userDoc != None: #Email is verified
+            if userDoc["verified"] == False:
+                return False
+            elif userDoc["verified"] == True:
+                safe_email = HTMLescaper(userDoc["email"])
+                return safe_email
+    elif username == "":
+        userDoc = authDB.find_one({"email": email})
+        if userDoc == None:
+            return True
+        if userDoc != None:
+            return False
 

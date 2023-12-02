@@ -8,6 +8,7 @@ RUN pip install bcrypt
 RUN pip install flask
 RUN pip install Flask-SocketIO
 RUN pip install Flask-Cors
+RUN pip install flask_mail
 
 EXPOSE 8080
 EXPOSE 27017

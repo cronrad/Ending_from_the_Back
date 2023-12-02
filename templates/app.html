@@ -14,6 +14,7 @@
     </div>
     <div class="user_info" style="">
         <p id="user">Username:</p>
+        <p id="email-status">Email:</p>
         <button id="logout-button" onclick="logOut()">Logout</button>
         <form action="{{ url_for('grades') }}" method="get">
             <button type="submit">Check Grades</button><br>
@@ -29,13 +30,18 @@
 
         <div class="post-form">
             Question Title:
+            <br/>
             <input id="post-title-box" type="text"><br><br>
             Question Description:
+            <br/>
             <input id="post-description-box" type="text"><br><br>
             Answer Key:
+            <br/>
             <input id="post-answer-key-box" type="text"><br><br>
             <label for="form-file">Upload picture for your question(Max 8 MB)</label>
+            <br/>
             <input id="form-file" type="file" name="upload">
+            <br/>
             <br/>
             <button id="post-button" onclick="sendPost()">Post Question</button><br>
             <br>

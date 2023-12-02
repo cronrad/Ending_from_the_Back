@@ -83,6 +83,7 @@ function logOut() {
     request.open("POST", "/logout");
     request.send(JSON.stringify(username));
     setTimeout(function(){
+        alert("You are now logged out")
         window.location.href = '/';
     }, 1000);
 }
@@ -116,6 +117,7 @@ function postHTML(postJSON) {
     let question_button = question_id + "button";
     let question_box = question_id + "box";
     let question_timer = question_id + "time";
+    let question_img = question_id + "img";
 
     let html_string = "<br>";
     let beginning_html = "<div id=" + question_id + ">";
@@ -123,7 +125,7 @@ function postHTML(postJSON) {
     let title_html = "<b>Question: </b>" + title + "<br><br>";
     html_string += beginning_html + username_html + title_html;
     if (image_name !== undefined && image_name !== null) {
-        let image_string = "<img src='public/image/" + image_name + "'><br>";
+        let image_string = "<img id='" + question_img + "' src='public/image/" + image_name + "'><br>";
         html_string += image_string;
     }
     let description_html = "<b>Description: </b>" + description + "<br>";
@@ -131,9 +133,9 @@ function postHTML(postJSON) {
     let timer_content_html = "<b id='" + question_timer + "'></b><br>"
     let submit_box_html = "<input id='" + question_box + "' type='text'>";
     let submit_html = "<button id='" + question_button + "' onclick='submitAnswer(this.id)'>Submit Answer</button><br>";
-    let ending_html = "</span></div><br><br><br>";
+    let ending_html = "</span></div><br><hr>";
     html_string += description_html + timer_html + timer_content_html + submit_box_html + submit_html + ending_html;
-    return [question_id, html_string];
+    return [question_id, question_img, html_string];
 
     /*
     const username = postJSON.username;
@@ -167,7 +169,7 @@ function clearPost() {
 
 function addPosts(postJSON) {
     const posts = document.getElementById("posts");
-    let [question_id, added_html] = postHTML(postJSON)
+    let [question_id, question_img, added_html] = postHTML(postJSON)
     posts.innerHTML += added_html
     let question_element = document.getElementById(question_id)
     question_element.style.margin = 'auto';
@@ -176,8 +178,17 @@ function addPosts(postJSON) {
     question_element.style.justifyContent = 'center';
     question_element.style.border = '1px solid black';
     question_element.style.backgroundColor = '#404040';
-    question_element.style.borderRadius = '30px';
+    question_element.style.borderRadius = '20px';
     question_element.style.display = 'display: inline-block';
+    question_element.style.maxHeight = '1000px';
+    question_element.style.padding = '10px';
+    let question_img_element = document.getElementById(question_img)
+    if (question_img_element !== null){
+        question_img_element.style.maxWidth = '500px';
+        question_img_element.style.maxHeight = '500px';
+        question_img_element.style.alignItems = 'center';
+        question_img_element.style.justifyContent = 'center';
+    }
     /*
     console.log(postHTML(postJSON));
     let regex = /id='question(\d+)box'/;
@@ -185,7 +196,7 @@ function addPosts(postJSON) {
     console.log("match")
     console.log(match)
     postList.push(match[1]);
-     */
+    */
 }
 
 //This should be the only function modified to support websockets over ajax
@@ -277,11 +288,20 @@ function newPost() {
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            username = JSON.parse(this.response);
-            if (username === false) {
-                username = "Guest";
+            let response_data = JSON.parse(request.responseText);
+            console.log(response_data)
+            if (response_data.username === false) {
+                response_data.username = "Guest";
             }
-            document.getElementById("user").innerHTML += username;
+            document.getElementById("user").innerHTML += response_data.username;
+            if (response_data.email === false){
+                document.getElementById("email-status").innerHTML += "[Not Verified]";
+                document.getElementById("email-status").style.color = "red";
+            }
+            else if (response_data.email !== false){
+                document.getElementById("email-status").innerHTML += response_data.email;
+                document.getElementById("email-status").innerHTML += " [Verified]"
+            }
         }
     }
     request.open("GET", "/username");
@@ -302,11 +322,13 @@ function getUsername(){
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            username = JSON.parse(this.response);
+            let response_data = JSON.parse(request.responseText);
+            username = response_data.username;
             if (username === false) {
                 username = "Guest";
             }
             document.getElementById("user").innerHTML += "<center>" + username + "<center>";
+            document.getElementById("user").innerHTML += "<button id=\"back_app\" onclick=\"backToApp()\" style=\"position: relative;\">Go Back</button>"
         }
     }
     request.open("GET", "/username");
@@ -317,8 +339,26 @@ function getUsername(){
 
 function addGradedPosts(postJSON) {
     const posts = document.getElementById("answered-questions");
-    posts.innerHTML += gradedPostHTML(postJSON);
-    let html = gradedPostHTML(postJSON)
+    let [question_id, question_img, added_html] = gradedPostHTML(postJSON)
+    posts.innerHTML += added_html
+    let question_element = document.getElementById(question_id)
+    question_element.style.margin = 'auto';
+    question_element.style.display = 'flex';
+    question_element.style.alignItems = 'center';
+    question_element.style.justifyContent = 'center';
+    question_element.style.border = '1px solid black';
+    question_element.style.backgroundColor = '#404040';
+    question_element.style.borderRadius = '20px';
+    question_element.style.display = 'display: inline-block';
+    question_element.style.maxHeight = '1000px';
+    question_element.style.padding = '10px';
+    let question_img_element = document.getElementById(question_img)
+    if (question_img_element !== null){
+        question_img_element.style.maxWidth = '500px';
+        question_img_element.style.maxHeight = '500px';
+        question_img_element.style.alignItems = 'center';
+        question_img_element.style.justifyContent = 'center';
+    }
 }
 
 function gradedPostHTML(postJSON) {
@@ -331,6 +371,7 @@ function gradedPostHTML(postJSON) {
     const real_username = postJSON.real_username;
 
     let question_id = "question" + postJSON["postID"];
+    let question_img = question_id + "img";
     let image_name = postJSON["file_name"];
 
     let html_string = "";
@@ -345,8 +386,8 @@ function gradedPostHTML(postJSON) {
     }
 
     let description_html = "<b>Description: </b>" + description + "<br>";
-    let expectedAnswer_html = "<b>Expected Answer: </b></b><span style='color: blue;'>" + expectedAnswer + "</span><br>";
-    let userAnswer_html = "<b>Your Answer: </b><span style='color: blue;'>"+userAnswers[real_username]+"</span></b><br>";
+    let expectedAnswer_html = "<b>Expected Answer: </b></b><span style='color: yellowgreen;'>" + expectedAnswer + "</span><br>";
+    let userAnswer_html = "<b>Your Answer: </b><span style='color: yellowgreen;'>"+userAnswers[real_username]+"</span></b><br>";
     // if (userAnswers && userAnswers[username]) {
     //     userAnswer_html += userAnswers[username] + "<br>";
     // } else {
@@ -363,7 +404,7 @@ function gradedPostHTML(postJSON) {
     let ending_html = "</span></div><br><br><hr>";
     html_string += description_html + expectedAnswer_html + userAnswer_html + grade_html + ending_html;
     
-    return html_string;
+    return [question_id, question_img, html_string];
 }
 
 
@@ -385,15 +426,32 @@ function updateGradedPost() {
 function clearGradedPost() {
     const posts = document.getElementById("answered-questions");
     posts.innerHTML = "";
-
 }
 
 // For question gradebook
 
 function addQuestionGradebook(postJSON) {
     const posts = document.getElementById("question-gradebook");
-    posts.innerHTML += questionGradebookPostHTML(postJSON);
-    let html = questionGradebookPostHTML(postJSON)
+    let [question_id, question_img, added_html] = questionGradebookPostHTML(postJSON);
+    posts.innerHTML += added_html
+    let question_element = document.getElementById(question_id)
+    question_element.style.margin = 'auto';
+    question_element.style.display = 'flex';
+    question_element.style.alignItems = 'center';
+    question_element.style.justifyContent = 'center';
+    question_element.style.border = '1px solid black';
+    question_element.style.backgroundColor = '#404040';
+    question_element.style.borderRadius = '20px';
+    question_element.style.display = 'display: inline-block';
+    question_element.style.maxHeight = '1000px';
+    question_element.style.padding = '10px';
+    let question_img_element = document.getElementById(question_img)
+    if (question_img_element !== null){
+        question_img_element.style.maxWidth = '500px';
+        question_img_element.style.maxHeight = '500px';
+        question_img_element.style.alignItems = 'center';
+        question_img_element.style.justifyContent = 'center';
+    }
 }
 
 function questionGradebookPostHTML(postJSON) {
@@ -405,6 +463,7 @@ function questionGradebookPostHTML(postJSON) {
     const userAnswers = postJSON.user_answers;  // Assuming user answers are stored in the "user_answers" property
 
     let question_id = "question" + postJSON["postID"];
+    let question_img = question_id + "img";
     let image_name = postJSON["file_name"];
 
     let html_string = "";
@@ -414,7 +473,7 @@ function questionGradebookPostHTML(postJSON) {
     html_string += beginning_html + username_html + title_html;
 
     if (image_name !== undefined && image_name !== null) {
-        let image_string = "<img src='public/image/" + image_name + "'><br>";
+        let image_string = "<img id='" + question_img + "' src='public/image/" + image_name + "'><br>";
         html_string += image_string;
     }
 
@@ -422,7 +481,7 @@ function questionGradebookPostHTML(postJSON) {
     html_string += description_html;
 
     // Display expected answer in blue
-    html_string += "<b>Expected Answer: </b><span style='color: blue;'>" + expectedAnswer + "</span><br>";
+    html_string += "<b>Expected Answer: </b><span style='color: greenyellow;'>" + expectedAnswer + "</span><br>";
 
     // Check if there are no answers
     if (!grades || Object.keys(grades).length === 0) {
@@ -458,7 +517,7 @@ function questionGradebookPostHTML(postJSON) {
     let ending_html = "</span></div><br><br><hr>";
     html_string += ending_html;
 
-    return html_string;
+    return [question_id, question_img, html_string];
 }
 
 
@@ -480,4 +539,8 @@ function updateQuestionGradebook() {
 function clearQuestionGradebook() {
     const posts = document.getElementById("question-gradebook");
     posts.innerHTML = "";
+}
+
+function backToApp() {
+    window.location.href = "/app";
 }

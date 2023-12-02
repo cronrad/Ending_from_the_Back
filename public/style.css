@@ -22,12 +22,16 @@ body {
     padding: 5px;
     width: 300px;
     border: 1px solid black;
+    border-radius: 20px;
     background-color:#404040;
 }
 
 .post_area{
     padding: 5px;
+    text-align: center;
+    margin: auto;
     width: 1000px;
     border: 1px solid black;
+    border-radius: 20px;
     background-color:#404040;
 }

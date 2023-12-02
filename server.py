@@ -7,6 +7,14 @@ from flask_socketio import SocketIO, emit
 import time
 
 app = Flask(__name__, static_folder='public')
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = EMAIL_USER
+app.config['MAIL_PASSWORD'] = EMAIL_PASSWORD
+app.config['MAIL_DEFAULT_SENDER'] = '312endingfromtheback@gmail.com'
+mail = Mail(app)
 socketio = SocketIO(app, transports='websocket', async_mode='threading', cors_allowed_origins="https://cse312.duckdns.org", max_http_buffer_size=8000000)
 authenticated_connections = {}
 guest_connections = {}
@@ -45,16 +53,35 @@ def register():
     body = json.loads(request.get_data())
     username = body.get("username")
     password = body.get("password")
+    email = body.get("email")
+    if username == "":
+        message = "You cannot have an empty username"
+        response = jsonify({"message": message})
+        return response, 200
+    elif password == "":
+        message = "You cannot have an empty password"
+        response = jsonify({"message": message})
+        return response, 200
+    elif email == "":
+        message = "You cannot have an empty email"
+        response = jsonify({"message": message})
+        return response, 200
     result = registerDB(username, password)
     if result == False:
         message = "Username already taken"
         response = jsonify({"message": message})
         return response, 200
     elif result == True:
-        message = "Registration Successful, Login Below"
+        email_check = checkEmail("", email)
+        if email_check == False:
+            message = "Email is already in use"
+            response = jsonify({"message": message})
+            return response, 200
+        message = "Registration Successful, A verification email has been sent to you"
         response = jsonify({"message": message})
+        email = emailVerificationLink(username, email)
+        mail.send(email)
         return response, 200
-
 
 # If you're looking to check if a user is authenticated, check authenticate() in utils/database.py
 # This is for processing the login from the login.html page only
@@ -216,12 +243,9 @@ def username():
     # This sends the username from backend to frontend for displaying once user is logged in
     auth_token = request.cookies.get("auth_token")
     token_check, username = authenticate("", "", auth_token, False)
-    response = app.response_class(
-        response=str(json.dumps(username)),
-        status=200,
-        mimetype='application/json'
-    )
-    return response
+    email = checkEmail(username, "")
+    response = jsonify({"username": username, "email": email})
+    return response, 200
 
 
 @app.route('/grades')
@@ -241,6 +265,25 @@ def question_gradebook():
     # gradebook for a user's questions
     response = question_grades(request, app)
     return response
+
+@app.route('/verification/<verificationToken>')                              
+def verification(verificationToken):
+    verified = authDB.find_one({"verificationToken": verificationToken})
+    if verified == None:
+        response = app.response_class(
+        response="404 PAGE NOT FOUND",
+        status=404,
+        mimetype='text/plain'
+        )
+        return response
+    else:
+        authDB.update_one({"verificationToken": verificationToken},{"$set": {"verified": True}})
+        response = app.response_class(
+        response="Account has been verified. You can now go back to the main app page and login.",
+        status=200,
+        mimetype='text/plain'
+        )
+        return response
 
 
 # This is where the http request for a 101 switching protocol occurs
