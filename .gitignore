@@ -4,3 +4,4 @@ utils/__pycache__/database.cpython-311.pyc
 utils/credentials.py
 *.pyc
 *.pyc
+*.zip

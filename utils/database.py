@@ -6,8 +6,8 @@ from flask_mail import Mail
 import string
 from flask_mail import Message
 
-mongoClient = MongoClient("localhost") #For testing only
-#mongoClient = MongoClient("mongo")
+#mongoClient = MongoClient("localhost") #For testing only
+mongoClient = MongoClient("mongo")
 
 db = mongoClient["cse312_project"]
 authDB = db["auth"]

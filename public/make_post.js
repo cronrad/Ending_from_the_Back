@@ -289,7 +289,6 @@ function newPost() {
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             let response_data = JSON.parse(request.responseText);
-            console.log(response_data)
             if (response_data.username === false) {
                 response_data.username = "Guest";
             }
