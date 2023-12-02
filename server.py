@@ -279,7 +279,7 @@ def verification(verificationToken):
     else:
         authDB.update_one({"verificationToken": verificationToken},{"$set": {"verified": True}})
         response = app.response_class(
-        response="Account has been verified. You can now go back to the main app page and login.",
+        response="Account has been verified.",
         status=200,
         mimetype='text/plain'
         )

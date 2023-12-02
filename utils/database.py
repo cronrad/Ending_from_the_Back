@@ -217,7 +217,7 @@ def emailVerificationLink(username, email):                                     
     email = Message(
         subject="Verify Your Email",
         recipients=[email],
-        html="Verify your email for cse312.duckdns.org by visiting this link: https://cse312.duckdns.org/verification/" + unique_token,
+        html="Verify your email for Not Tophat by visiting this link: https://cse312.duckdns.org/verification/" + unique_token,
         sender="312endingfromtheback@gmail.com"
     )
     return email
