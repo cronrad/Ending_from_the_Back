@@ -1,6 +1,7 @@
 from flask import *
 from utils.getGrades import *
 import json
+from utils.dosprotection import *
 from utils.credentials import EMAIL_USER, EMAIL_PASSWORD
 import bson.json_util as json_util
 from flask_socketio import SocketIO, emit
@@ -19,6 +20,15 @@ socketio = SocketIO(app, transports='websocket', async_mode='threading', cors_al
 authenticated_connections = {}
 guest_connections = {}
 resetTimers()  # Sets all question timers to 0 so no frozen timers
+protection = Protection()
+
+@app.before_request
+def before_request():
+    ip_address = request.remote_addr
+    # Check if ip should be blocked
+    response = protection.handle_protection(ip_address)
+    if response:
+        return response
 
 
 @app.after_request
