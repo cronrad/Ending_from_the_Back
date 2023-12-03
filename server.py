@@ -24,7 +24,7 @@ protection = Protection()
 
 @app.before_request
 def before_request():
-    ip_address = request.remote_addr
+    ip_address = request.headers.get('X-Real-IP')
     # Check if ip should be blocked
     response = protection.handle_protection(ip_address)
     if response:
@@ -182,7 +182,6 @@ def posts():
 @app.route('/logout', methods=['POST'])
 def logout():
     body = json.loads(request.get_data())
-    print(body)
     # This logs user out incase they want to logout or switch to a different account
     auth_token = request.cookies.get("auth_token")
     token_check, username = authenticate("", "", auth_token, False)
