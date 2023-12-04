@@ -182,7 +182,6 @@ def posts():
 @app.route('/logout', methods=['POST'])
 def logout():
     response = app.response_class(
-        response=username,
         status=200,
         mimetype='text/plain'
     )
