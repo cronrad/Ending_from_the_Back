@@ -77,15 +77,12 @@ function logOut() {
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            username = this.response;
+            alert("You are now logged out")
+            window.location.href = '/';
         }
     }
     request.open("POST", "/logout");
     request.send(JSON.stringify(username));
-    setTimeout(function(){
-        alert("You are now logged out")
-        window.location.href = '/';
-    }, 1000);
 }
 
 function likePost(username, id) {

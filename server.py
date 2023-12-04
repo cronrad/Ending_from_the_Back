@@ -181,11 +181,6 @@ def posts():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    body = json.loads(request.get_data())
-    # This logs user out incase they want to logout or switch to a different account
-    auth_token = request.cookies.get("auth_token")
-    token_check, username = authenticate("", "", auth_token, False)
-    authDB.update_one({}, {"$unset": {"authToken": ""}})
     response = app.response_class(
         response=username,
         status=200,
